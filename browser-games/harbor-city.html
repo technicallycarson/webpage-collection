@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#365f4b"><meta name="description" content="Build a city by the river. A playable Three.js city-building sandbox with roads, neighborhoods, utilities, traffic and a living economy."><title>Harbor City — A city of your making</title><style>:root{color-scheme:light;--ink:#263d37;--muted:#7e8c80;--paper:rgba(253,254,248,.94);--line:rgba(74,94,74,.13);--green:#366953;--accent:#ddab64;--shadow:0 8px 36px rgba(36,63,49,.09),0 1px 2px rgba(36,63,49,.06);font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-synthesis:none}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#b4c8a0;color:var(--ink);font-size:13px}button,input{font:inherit}button{cursor:pointer;color:inherit;border:0;background:none}button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #478b72;outline-offset:4px}button{transition:background .16s,transform .16s,box-shadow .16s}button:active{transform:translateY(1px)}button:disabled{opacity:.4;cursor:default}svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}#world{position:fixed;inset:0;touch-action:none;cursor:grab}#world canvas{position:absolute;inset:0;width:100%;height:100%;outline:none}#world.building{cursor:crosshair}#world.dragging{cursor:grabbing}.ui{z-index:10;position:absolute;pointer-events:auto}.glass{background:var(--paper);border:1px solid rgba(255,255,255,.65);box-shadow:var(--shadow);backdrop-filter:blur(18px)}.topbar{left:26px;right:26px;top:22px;height:79px;border-radius:18px;display:flex;align-items:center;padding:0 19px;gap:20px}.brand{display:flex;align-items:center;gap:13px;min-width:234px}.brandmark{background:#315e4c;width:43px;height:43px;border-radius:12px;display:grid;place-items:center;color:#f2eddb}.brandmark svg{width:26px;height:26px;stroke-width:1.7}.brand h1{font-size:17px;font-weight:760;letter-spacing:2.5px;margin:0;line-height:1.4}.brand small{font-size:10px;letter-spacing:1px;color:var(--muted)}.metric{display:flex;align-items:center;text-align:left;gap:11px;padding:0 14px 0 22px;border-left:1px solid var(--line);height:42px;min-width:146px}.metric>svg{color:#82917e;width:21px;height:21px}.metric strong{font-size:20px;font-weight:660;display:block;letter-spacing:-.5px;font-variant-numeric:tabular-nums}.metric small{display:block;color:#7c8b7d;font-size:10px;margin-top:3px}.metric small.positive{color:#4d8264}.top-spacer{flex:1}.weather{display:flex;align-items:center;gap:9px;white-space:nowrap}.weather svg{color:#b59352;width:24px;height:24px}.weather strong{font-size:13px;font-weight:600}.weather small{display:block;font-size:10px;color:var(--muted);margin-top:4px}.top-actions{display:flex;gap:5px;border-left:1px solid var(--line);padding-left:14px}.icon-btn{width:35px;height:35px;border-radius:9px;display:grid;place-items:center}.icon-btn:hover,.icon-btn.active{background:#e8eee3}.icon-btn svg{width:18px;height:18px}.left-column{left:28px;top:130px;width:211px;display:flex;flex-direction:column;gap:13px}.eyebrow{font-size:9px;letter-spacing:1.75px;color:var(--muted);font-weight:700}.region-heading{padding:1px 2px 8px}.region-heading .eyebrow{color:#385948;text-shadow:0 1px 4px #d7e5cf;letter-spacing:2px}.region-heading .live{margin-top:7px;font-size:11px;color:#4c6651}.live-dot{display:inline-block;width:6px;height:6px;background:#4a7e57;border-radius:50%;margin-right:6px;box-shadow:0 0 0 3px #d0dec0}.goal-card{padding:20px 19px 16px;border-radius:16px}.goal-card .eyebrow{display:flex;justify-content:space-between;align-items:center}.goal-card .eyebrow svg{width:17px;height:17px;color:#b9a16c}.goal-card h2{font-weight:620;font-size:23px;letter-spacing:-.8px;margin:13px 0 7px}.goal-card p{color:#7a8879;font-size:11px;line-height:1.65;margin:0}.progress-track{height:4px;border-radius:4px;background:#e5eadf;margin:17px 0 9px;overflow:hidden}.progress-track>div{background:#799a72;height:100%;width:50%;border-radius:4px;transition:width .5s}.goal-numbers{display:flex;justify-content:space-between;font-size:10px;color:#728471}.goal-reward{font-size:10px;display:flex;gap:7px;align-items:center;margin-top:16px;padding-top:13px;border-top:1px solid var(--line);color:#8b947d}.goal-reward svg{width:13px;height:13px;color:#b19964}.services-card{border-radius:15px;padding:16px 18px}.card-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.card-heading .eyebrow{font-size:9px;letter-spacing:1.4px}.card-heading>svg{width:15px;height:15px;color:#89a283}.service-row{display:grid;grid-template-columns:17px 1fr auto;align-items:center;gap:8px;margin:13px 0;font-size:10px}.service-row svg{width:15px;height:15px;color:#9b9f7c}.service-row b{font-weight:550;color:#5f805e}.service-meter{height:3px;background:#e6eadd;border-radius:2px;grid-column:2 / 4;margin-top:-3px}.service-meter span{display:block;height:100%;background:#95ad82;border-radius:2px;transition:width .5s}.service-row:last-child{margin-bottom:1px}.map-panel{right:28px;top:132px;width:174px;border-radius:15px;padding:12px}.map-heading{display:flex;justify-content:space-between;align-items:center;margin:0 0 9px}.map-heading .eyebrow{font-size:8px;letter-spacing:1.4px}.north{font-size:9px;letter-spacing:.4px;color:#687c67;display:flex;gap:4px;align-items:center}.north svg{width:10px;height:10px}.minimap-wrap{height:147px;overflow:hidden;border-radius:8px;position:relative;border:1px solid #d4ddca}#minimap{width:100%;height:100%;cursor:crosshair;image-rendering:pixelated}.map-caption{display:flex;justify-content:space-between;color:#8c9886;font-size:8px;letter-spacing:.6px;margin-top:9px}.layers{right:28px;top:357px;padding:6px;display:flex;gap:3px;border-radius:12px}.layers button{width:35px;height:34px;border-radius:8px;display:grid;place-items:center;color:#81917e}.layers button:hover{background:#edf0e5}.layers button.active{background:#406d56;color:#f6f5e9}.layers button svg{width:17px;height:17px}.layer-name{position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%);white-space:nowrap;padding:5px 9px;background:rgba(246,248,236,.78);border-radius:6px;font-size:9px;color:#52694f;pointer-events:none}.compass{right:32px;top:424px;display:flex;flex-direction:column;gap:5px;padding:5px;border-radius:12px}.compass .icon-btn{height:32px;width:32px}.compass .icon-btn svg{width:15px;height:15px}.bottom-toolbar{left:50%;transform:translateX(-50%);bottom:49px;border-radius:19px;display:flex;gap:4px;padding:10px 11px;align-items:center;height:85px}.tool{width:65px;height:65px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;position:relative;color:#748372}.tool svg{height:23px;width:23px;stroke-width:1.5}.tool span{font-size:10px;font-weight:500}.tool:hover{background:#edf0e5;color:#345c47}.tool.active{background:#34634f;color:#fffdf1;box-shadow:0 3px 10px #274f4321}.tool .swatch{width:4px;height:4px;position:absolute;bottom:5px;border-radius:50%}.tool[data-tool=residential] .swatch{background:#91b88b}.tool[data-tool=commercial] .swatch{background:#77acbf}.tool[data-tool=industrial] .swatch{background:#d6ad67}.tool[data-tool=bulldoze]{color:#b08d69}.toolbar-divider{width:1px;height:31px;background:var(--line);margin:0 3px}.shortcut{font-size:8px;position:absolute;top:5px;right:7px;color:#b3baaa}.tool.active .shortcut{color:#b9c9b8}.clock-panel{left:28px;bottom:49px;border-radius:15px;padding:14px 16px;height:85px;min-width:177px}.clock-date{display:flex;gap:8px;align-items:center;font-size:10px;font-weight:560;letter-spacing:.65px;margin-bottom:10px}.clock-date svg{height:13px;width:13px;color:#8c9983}.clock-controls{display:flex;gap:5px;align-items:center}.speed-button{font-size:10px;padding:5px 10px;border-radius:6px;font-weight:650;min-width:30px;height:24px}.speed-button.active{color:#fffcef;background:#3d6b54}.speed-button:hover:not(.active){background:#e7ecdf}.speed-button svg{width:12px;height:12px}.day-progress{flex:1;height:2px;background:#dee6d5;margin-left:3px}.day-progress>span{height:100%;display:block;background:#8ea384;width:50%}.demand-panel{right:28px;bottom:49px;border-radius:15px;padding:14px 16px;height:85px;width:172px}.demand-panel .eyebrow{font-size:8px;letter-spacing:1.3px}.demand-bars{display:flex;justify-content:space-between;align-items:end;height:42px;margin-top:2px}.demand-item{display:flex;gap:6px;align-items:end}.demand-item small{font-size:9px;line-height:1.6;color:#8e987f}.demand-item strong{font-size:13px;font-weight:550;color:#4f6750;display:block;line-height:1.2}.demand-bar{height:31px;width:5px;background:#e7ecdf;border-radius:3px;display:flex;align-items:end}.demand-bar span{display:block;border-radius:3px;width:100%;height:50%;transition:height .5s}.demand-bar.r span{background:#8cb488}.demand-bar.c span{background:#79abb9}.demand-bar.i span{background:#d0ad71}.footer{left:28px;right:28px;bottom:16px;display:flex;align-items:center;justify-content:space-between;color:#537153;font-size:9px;text-shadow:0 1px 5px #dce7d0;pointer-events:none;letter-spacing:.1px}.footer .center-help{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px}.footer kbd{border:1px solid #81947666;background:#e7eddb77;border-radius:3px;font-size:9px;padding:1px 4px;margin:0 2px;font-family:inherit}.saved-status{display:flex;align-items:center;gap:6px}.saved-status svg{width:11px;height:11px}.footer button{pointer-events:auto;color:#526f50;font-size:9px;padding:0}.build-info{left:50%;transform:translateX(-50%);bottom:149px;border-radius:14px;width:490px;padding:13px 17px;display:none;align-items:center;gap:13px}.build-info.visible{display:flex}.build-info .info-icon{height:39px;width:39px;border-radius:10px;background:#e6ecdf;display:grid;place-items:center;color:#5c7e5e;flex-shrink:0}.build-info h3{font-size:12px;margin:0 0 5px;font-weight:600}.build-info p{font-size:10px;color:#84907b;margin:0;line-height:1.4}.build-info .info-text{flex:1}.build-info .price{font-size:14px;font-weight:600;color:#5d7856;white-space:nowrap;text-align:right}.build-info .price small{font-size:9px;display:block;font-weight:400;color:#8b9882;margin-top:4px}.options-row{display:none;left:50%;bottom:231px;transform:translateX(-50%);border-radius:12px;padding:7px;gap:5px}.options-row.visible{display:flex}.option{border-radius:8px;padding:8px 11px;font-size:10px;white-space:nowrap;display:flex;gap:7px;align-items:center;color:#829077}.option.active{background:#e3ecdc;color:#36644e}.option:hover{background:#edf1e6}.option svg{height:17px;width:17px}.option small{color:#9aa58a;font-size:9px}.inspector{border-radius:15px;padding:15px 17px;display:none}.inspector.visible{display:block}.inspector .close{float:right;margin-top:-6px;margin-right:-9px;width:27px;height:27px}.inspector h3{font-size:16px;font-weight:600;margin:9px 0 6px;line-height:1.25}.inspector p{font-size:10px;line-height:1.7;color:#85927d}.inspection-row{display:flex;justify-content:space-between;font-size:10px;margin:10px 0}.inspection-row span{color:#8a9780}.inspection-row b{font-weight:600}.status-badge{display:inline-flex;gap:5px;align-items:center;font-size:9px;background:#e5eddd;color:#65835b;padding:5px 7px;border-radius:6px;margin-top:3px}.status-badge.bad{background:#f0e1d4;color:#ab7961}.inspect-demolish{display:flex;align-items:center;gap:6px;font-size:10px;margin-top:14px;color:#a17b58;border-top:1px solid var(--line);padding:12px 0 0;width:100%}.inspect-demolish svg{width:13px;height:13px}.district-labels{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}.district{position:absolute;transform:translate(-50%,-50%);font-size:10px;letter-spacing:2.1px;font-weight:650;color:#f8fff0;text-shadow:0 1px 5px #476644,0 0 15px #37593166;white-space:nowrap;opacity:.86}.district small{display:block;font-size:7px;letter-spacing:1.5px;text-align:center;margin-top:5px;opacity:.8;font-weight:500}.district.river{color:#f1ffff;font-size:11px;font-style:italic;letter-spacing:3px;font-weight:400;text-shadow:0 1px 5px #60999d;transform:translate(-50%,-50%) rotate(-53deg)}.toast-stack{position:fixed;top:119px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;z-index:60;pointer-events:none}.toast{display:flex;align-items:center;gap:9px;padding:12px 17px;background:rgba(40,66,51,.95);color:#f5f5e4;box-shadow:0 5px 25px #27482c25;border-radius:11px;font-size:11px;animation:toast-in .22s ease;max-width:550px}.toast svg{width:16px;height:16px;color:#c8d5ae}.toast.error{background:#835f4f}.toast strong{font-weight:600}.toast div small{display:block;opacity:.75;margin-top:4px;font-size:10px}@keyframes toast-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}.modal-shade{position:fixed;inset:0;background:#20362640;backdrop-filter:blur(8px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}.modal-shade.open{display:flex}.modal{width:570px;max-height:90vh;overflow-y:auto;background:#f7f9f0;border:1px solid #ffffff99;border-radius:22px;padding:29px;box-shadow:0 30px 100px #233b3440}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-header h2{font-size:24px;font-weight:620;letter-spacing:-.7px;margin:6px 0 0}.modal-header .icon-btn{align-self:start}.modal p{font-size:12px;color:#7c8a76;line-height:1.75}.modal .lead{font-size:13px;line-height:1.8;color:#6b7f65}.modal-actions{margin-top:24px;display:flex;justify-content:end;gap:9px}.btn{background:#e8eddf;border:1px solid #dce5d2;padding:11px 16px;border-radius:10px;display:inline-flex;gap:8px;align-items:center;font-size:11px;font-weight:550}.btn:hover{background:#dce6d2}.btn.primary{background:#3b6a51;color:#fffcf0;border-color:#3b6a51}.btn.primary:hover{background:#2c5942}.btn.danger{background:#eee2d5;color:#9b7459;border-color:#e1d5c7}.btn svg{width:15px;height:15px}.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.help-card{background:#edf2e5;border-radius:12px;padding:16px}.help-card svg{color:#719168;margin-bottom:8px}.help-card h4{font-size:12px;margin:2px 0 7px;font-weight:600}.help-card p{font-size:10px;line-height:1.75;margin:0}.keyboard-table{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:20px}.keyboard-table div{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:10px;color:#7b8b71}.keyboard-table kbd{border:1px solid #d6dfcd;padding:4px 6px;border-radius:5px;background:#f5f8ec;color:#567348;white-space:nowrap;font-family:inherit}.budget-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:17px}.budget-summary>div{background:#edf1e3;border-radius:11px;padding:16px 12px}.budget-summary small{font-size:9px;color:#8b987d;display:block;margin-bottom:8px}.budget-summary strong{font-size:20px;letter-spacing:-.5px;font-weight:600}.budget-chart{height:105px;border-bottom:1px solid #dbe4d0;margin-bottom:17px}.budget-chart svg{width:100%;height:100%;overflow:visible;stroke:none}.tax-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0 7px}.tax-row strong{font-size:12px;font-weight:550}.tax-row span{font-size:22px;color:#507447}input[type=range]{width:100%;accent-color:#678958;margin:10px 0 2px}.range-labels{display:flex;justify-content:space-between;font-size:9px;color:#98a187}.budget-note{font-size:10px!important;margin:15px 0 0}.name-input{width:100%;border:1px solid #d6dfcd;background:#fdfef8;padding:11px 13px;border-radius:8px;color:#426341;font-size:14px}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}.settings-grid button{justify-content:center}.settings-label{font-size:10px;letter-spacing:.6px;color:#819073;margin-bottom:8px;display:block}.settings-note{font-size:10px!important}.photo-exit{position:absolute;left:50%;transform:translateX(-50%);bottom:27px;z-index:99;display:none;padding:8px 10px;border-radius:12px;gap:8px;align-items:center}.photo-exit button{font-size:11px;padding:8px 12px;display:flex;gap:8px;align-items:center;border-radius:8px}.photo-exit button:hover{background:#e8efde}.photo-exit svg{width:16px;height:16px}body.photo .ui,body.photo .district-labels{display:none!important}body.photo .photo-exit{display:flex}.welcome-pill{position:absolute;left:50%;transform:translateX(-50%);bottom:152px;z-index:9;pointer-events:none;display:flex;gap:10px;align-items:center;color:#4b6949;border:1px solid #ffffff88;background:#f4f8e9c9;border-radius:40px;padding:10px 17px;font-size:11px;box-shadow:0 3px 10px #4063380b;transition:opacity .5s}.welcome-pill svg{width:15px;height:15px;color:#719167}.welcome-pill.hidden{opacity:0}.bad-number{color:#b06e55!important}.noscript{position:fixed;inset:30%;background:#fff;padding:30px;z-index:200;border-radius:20px}
+@media(min-width:1800px){.left-column{width:230px}.map-panel{width:190px}.minimap-wrap{height:162px}.layers{top:373px}.compass{top:440px}.bottom-toolbar{gap:8px}.tool{width:72px}.goal-card h2{font-size:25px}}
+@media(max-width:1200px){.brand{min-width:190px}.brand h1{font-size:14px}.brand small{font-size:8px}.topbar{gap:10px;padding:0 14px}.metric{min-width:115px;padding-left:14px;gap:8px}.metric strong{font-size:18px}.weather{display:none}.left-column{width:185px;left:22px}.goal-card{padding:17px 16px}.goal-card h2{font-size:21px}.map-panel{right:22px;width:151px}.minimap-wrap{height:124px}.layers{right:22px;top:333px}.layers button{width:29px}.compass{right:24px;top:397px}.clock-panel{left:22px;min-width:154px;padding:14px 12px}.demand-panel{right:22px;width:145px;padding:14px 12px}.tool{width:57px}.bottom-toolbar{gap:2px;padding:9px}.toolbar-divider{margin:0 2px}.top-actions{padding-left:10px}.metric>svg{width:17px}.brandmark{width:38px;height:38px}.footer{left:22px;right:22px}.renderer-status{display:none}}
+@media(max-width:950px){.topbar{top:14px;left:14px;right:14px;height:66px}.brand{min-width:0;gap:9px;margin-right:8px}.brand h1{font-size:12px;letter-spacing:1.5px}.brand small{display:none}.brandmark{width:34px;height:34px;border-radius:9px}.metric{min-width:90px;padding-left:12px}.metric strong{font-size:16px}.metric small{font-size:8px}.metric>svg{display:none}.top-actions .optional{display:none}.top-actions{gap:0;padding-left:5px}.top-actions .icon-btn{width:30px}.left-column{top:104px;left:17px;width:164px}.goal-card{padding:15px}.goal-card h2{font-size:19px}.goal-card p{font-size:10px}.goal-reward{font-size:9px}.services-card{display:none}.map-panel{top:106px;right:17px;width:132px;padding:9px}.minimap-wrap{height:109px}.map-caption{font-size:7px}.layers{right:17px;top:288px}.layers button{width:24px;height:28px}.compass{right:17px;top:346px}.bottom-toolbar{bottom:63px}.clock-panel{left:17px;bottom:167px;height:74px;min-width:146px;padding:10px 12px}.demand-panel{right:17px;bottom:167px;height:74px;width:131px;padding:11px 12px}.demand-bars{height:34px}.demand-bar{height:24px}.demand-item strong{font-size:11px}.demand-panel .eyebrow{font-size:7px}.footer{bottom:25px;left:17px;right:17px}.footer .center-help{font-size:9px}.saved-status{display:none}.welcome-pill{bottom:164px;font-size:10px;padding:9px 14px}.build-info{bottom:164px;width:440px}.options-row{bottom:245px}.district{font-size:8px}.goal-numbers{font-size:9px}.toast-stack{top:94px;max-width:85vw}.toast{font-size:10px}.top-spacer{min-width:0}}
+@media(max-width:650px){.brand h1{display:none}.brand{margin:0}.topbar{gap:5px;padding:0 10px;height:60px}.metric{min-width:74px;padding-left:10px}.metric strong{font-size:15px}.metric small{font-size:7px}.top-actions{border:0;padding:0}.top-actions .icon-btn{width:27px}.top-actions #photo-btn{display:none}.metric-happy{min-width:50px}.left-column{top:94px;width:151px;gap:10px}.region-heading .eyebrow{font-size:8px;letter-spacing:1.2px}.region-heading .live{font-size:9px}.goal-card{padding:14px}.goal-card .eyebrow{font-size:8px;letter-spacing:1px}.goal-card h2{font-size:18px}.goal-card p{font-size:9px}.goal-reward{margin-top:11px;padding-top:10px;font-size:8px}.progress-track{margin-top:12px}.map-panel{top:96px;width:107px}.minimap-wrap{height:84px}.map-heading .eyebrow{font-size:6px;letter-spacing:.8px}.map-caption{display:none}.map-heading{margin-bottom:6px}.layers{top:218px;width:36px;right:17px;flex-direction:column;gap:3px;padding:4px}.layers button{width:27px}.layer-name{display:none}.compass{top:364px;right:17px;padding:3px}.compass .icon-btn{width:28px;height:28px}.bottom-toolbar{bottom:43px;width:calc(100% - 20px);justify-content:space-between;padding:6px;gap:0;height:71px;border-radius:15px}.tool{width:calc((100vw - 56px)/8);max-width:58px;height:57px;border-radius:10px;gap:5px}.tool span{font-size:8px}.tool svg{width:20px;height:20px}.toolbar-divider{display:none}.shortcut{display:none}.tool .swatch{bottom:3px;width:3px;height:3px}.clock-panel{left:13px;bottom:127px;min-width:139px;height:71px;padding:11px}.clock-date{font-size:8px;margin-bottom:8px}.speed-button{padding:4px 9px;height:22px;font-size:9px}.demand-panel{right:13px;bottom:127px;width:119px;height:71px}.demand-item{gap:3px}.demand-item small{font-size:8px}.footer{bottom:15px;left:13px;right:13px}.footer .center-help{font-size:8px}.footer .about-footer{display:none}.footer kbd{font-size:7px;padding:1px 3px}.build-info{bottom:208px;width:calc(100% - 32px);padding:11px 13px;gap:9px}.build-info .info-icon{width:31px;height:31px}.build-info h3{font-size:11px}.build-info p{font-size:9px}.build-info .price{font-size:12px}.options-row{bottom:284px;max-width:calc(100% - 30px);overflow-x:auto;justify-content:flex-start}.option{padding:7px 9px;font-size:9px}.option svg{width:14px;height:14px}.option small{display:none}.welcome-pill{bottom:213px;font-size:9px;white-space:nowrap;padding:8px 11px}.inspector{padding:13px}.inspector h3{font-size:14px}.goal-card:has(~.inspector.visible){display:none}.left-column:has(.inspector.visible) .goal-card{display:none}.modal{padding:21px;border-radius:17px}.modal-header h2{font-size:22px}.help-grid{gap:9px}.help-card{padding:12px}.help-card p{font-size:9px}.keyboard-table div{font-size:8px;gap:7px}.budget-summary strong{font-size:16px}.budget-summary>div{padding:12px 9px}.toast{padding:10px 12px;max-width:90vw}.district-labels{opacity:.65}}
+@media(max-height:710px) and (min-width:651px){.left-column{top:105px;gap:8px}.region-heading{display:none}.services-card{display:none}.goal-card{padding:15px}.goal-card h2{margin-top:8px}.goal-card p{font-size:10px}.map-panel{top:111px;width:125px;padding:9px}.minimap-wrap{height:100px}.map-caption{display:none}.layers{top:266px}.compass{top:324px}.bottom-toolbar,.clock-panel,.demand-panel{bottom:37px}.footer{bottom:13px}.build-info{bottom:132px}.options-row{bottom:212px}.welcome-pill{bottom:133px}}
+/* Keep wrapped SVG icons from squeezing compact metric columns. */
+.metric>i{display:flex;align-items:center;flex-shrink:0;color:#82917e}.metric>i svg{width:21px;height:21px}
+@media(max-width:950px){.metric>i{display:none}}
+@media(max-width:650px){.region-heading .eyebrow{font-size:7px;letter-spacing:1px}.goal-card p{font-size:9px}.goal-card .goal-reward{line-height:1.6}}
+</style></head>
+<body>
+<div id="world"></div>
+<div class="district-labels" id="district-labels">
+  <div class="district" data-x="-59" data-z="-38" data-y="7">THE WORKS<small>INDUSTRIAL QUARTER</small></div>
+  <div class="district" data-x="-39" data-z="5" data-y="22">DOWNTOWN<small>HARBOR CITY</small></div>
+  <div class="district" data-x="-51" data-z="42" data-y="6">CEDAR HEIGHTS</div>
+  <div class="district" data-x="71" data-z="-9" data-y="6">EAST BANK</div>
+  <div class="district river" data-x="62" data-z="52" data-y="0">WILLOW RIVER</div>
+</div>
+<header class="ui topbar glass">
+  <div class="brand"><div class="brandmark" data-icon="skyline"></div><div><h1 id="brand-name">HARBOR CITY</h1><small>A CITY OF YOUR MAKING</small></div></div>
+  <button class="metric" id="budget-btn" title="Open the city budget"><i data-icon="wallet"></i><div><strong id="money">$84,260</strong><small class="positive" id="income">+$5,804 / week</small></div></button>
+  <div class="metric"><i data-icon="people"></i><div><strong id="population">4,302</strong><small id="population-delta">Residents & counting</small></div></div>
+  <div class="metric metric-happy"><i data-icon="smile"></i><div><strong id="happiness">90<span style="font-size:12px">%</span></strong><small id="happiness-label">Feeling at home</small></div></div>
+  <div class="top-spacer"></div><div class="weather"><i data-icon="sun" id="weather-icon"></i><div><strong id="temperature">18°</strong><small id="weather-label">A little room to grow</small></div></div>
+  <div class="top-actions"><button class="icon-btn optional" id="save-btn" title="Save city (Ctrl+S)" aria-label="Save city" data-icon="save"></button><button class="icon-btn" id="photo-btn" title="Photo mode (P)" aria-label="Photo mode" data-icon="camera"></button><button class="icon-btn" id="help-btn" title="How to play (?)" aria-label="How to play" data-icon="help"></button><button class="icon-btn" id="settings-btn" title="City settings" aria-label="City settings" data-icon="settings"></button></div>
+</header>
+<aside class="ui left-column">
+  <div class="region-heading"><div class="eyebrow">YOUR CORNER OF THE WORLD</div><div class="live"><span class="live-dot"></span><span id="city-tier">Growing township</span></div></div>
+  <section class="goal-card glass"><div class="eyebrow">THE NEXT CHAPTER<i data-icon="flag"></i></div><h2 id="goal-title">Room to grow.</h2><p id="goal-description">A thriving city starts with a place to call home. Reach 5,000 residents.</p><div class="progress-track"><div id="goal-progress"></div></div><div class="goal-numbers"><span id="goal-current">4,302 residents</span><span id="goal-target">5,000</span></div><div class="goal-reward"><i data-icon="gift"></i><span id="goal-reward">$20,000 development grant</span></div></section>
+  <section class="services-card glass"><div class="card-heading"><span class="eyebrow">KEEPING THE LIGHTS ON</span><i data-icon="leaf"></i></div><div class="service-row"><i data-icon="bolt"></i><span>Electricity</span><b id="power-label">100%</b><div class="service-meter"><span id="power-meter"></span></div></div><div class="service-row"><i data-icon="drop"></i><span>Water supply</span><b id="water-label">100%</b><div class="service-meter"><span id="water-meter"></span></div></div><div class="service-row"><i data-icon="traffic"></i><span>Traffic flow</span><b id="traffic-label">74%</b><div class="service-meter"><span id="traffic-meter"></span></div></div></section>
+  <section class="inspector glass" id="inspector"><button class="icon-btn close" id="close-inspector" aria-label="Close inspector" data-icon="close"></button><div class="eyebrow" id="inspect-eyebrow">BUILDING DETAILS</div><h3 id="inspect-title"></h3><div id="inspect-content"></div><button class="inspect-demolish" id="inspect-demolish"><i data-icon="bulldoze"></i>Demolish · $30</button></section>
+</aside>
+<aside class="ui map-panel glass"><div class="map-heading"><span class="eyebrow">THE BIG PICTURE</span><span class="north"><i data-icon="north"></i>N</span></div><div class="minimap-wrap"><canvas id="minimap" width="240" height="240" aria-label="City minimap. Click to move the camera."></canvas></div><div class="map-caption"><span>WILLOW VALLEY</span><span>48 × 48 LOTS</span></div></aside>
+<div class="ui layers glass" aria-label="Map layers"><button data-layer="none" class="active" title="Overview" aria-label="Overview" data-icon="layers"></button><button data-layer="zoning" title="Land use" aria-label="Land use" data-icon="zoning"></button><button data-layer="traffic" title="Traffic" aria-label="Traffic" data-icon="traffic"></button><button data-layer="services" title="Service access" aria-label="Service access" data-icon="bolt"></button><span class="layer-name" id="layer-name">Overview</span></div>
+<div class="ui compass glass"><button class="icon-btn" id="home-btn" title="Reset camera (H)" aria-label="Reset camera" data-icon="compass"></button><button class="icon-btn" id="zoom-in" title="Zoom in" aria-label="Zoom in" data-icon="plus"></button><button class="icon-btn" id="zoom-out" title="Zoom out" aria-label="Zoom out" data-icon="minus"></button><button class="icon-btn" id="night-btn" title="Day / night (V)" aria-label="Toggle day or night" data-icon="moon"></button><button class="icon-btn" id="grid-btn" title="Toggle building grid (G)" aria-label="Toggle building grid" data-icon="grid"></button></div>
+<div class="welcome-pill ui" id="welcome-pill"><i data-icon="leaf"></i>A city is never finished. What will you build next?</div>
+<div class="ui build-info glass" id="build-info"><div class="info-icon" id="build-icon"></div><div class="info-text"><h3 id="build-title">Two-lane road</h3><p id="build-description">Drag to connect your next neighborhood.</p></div><div class="price" id="build-price">$80<small>per tile</small></div></div>
+<div class="ui options-row glass" id="zone-options"><button class="option active" data-density="low"><i data-icon="home"></i>Low density</button><button class="option" data-density="high"><i data-icon="skyline"></i>High density</button><div class="toolbar-divider" style="height:20px"></div><button class="option active" data-brush="1">1 × 1</button><button class="option" data-brush="2">2 × 2</button><button class="option" data-brush="3">3 × 3</button></div>
+<div class="ui options-row glass" id="service-options"><button class="option active" data-service="power"><i data-icon="wind"></i>Wind <small>$4,200</small></button><button class="option" data-service="water"><i data-icon="drop"></i>Water <small>$3,600</small></button><button class="option" data-service="fire"><i data-icon="flame"></i>Fire <small>$4,800</small></button><button class="option" data-service="hospital"><i data-icon="medical"></i>Health <small>$7,200</small></button></div>
+<nav class="ui bottom-toolbar glass" aria-label="Construction tools">
+  <button class="tool active" data-tool="inspect" title="Explore and inspect (Esc)"><i data-icon="cursor"></i><span>Inspect</span><small class="shortcut">ESC</small></button><div class="toolbar-divider"></div>
+  <button class="tool" data-tool="road" title="Build roads and bridges (1)"><i data-icon="road"></i><span>Roads</span><small class="shortcut">1</small></button>
+  <button class="tool" data-tool="residential" title="Zone residential (2)"><i data-icon="home"></i><span>Homes</span><b class="swatch"></b><small class="shortcut">2</small></button>
+  <button class="tool" data-tool="commercial" title="Zone commercial (3)"><i data-icon="shop"></i><span>Shops</span><b class="swatch"></b><small class="shortcut">3</small></button>
+  <button class="tool" data-tool="industrial" title="Zone industrial (4)"><i data-icon="factory"></i><span>Industry</span><b class="swatch"></b><small class="shortcut">4</small></button>
+  <div class="toolbar-divider"></div><button class="tool" data-tool="park" title="Build a park (5)"><i data-icon="tree"></i><span>Parks</span><small class="shortcut">5</small></button>
+  <button class="tool" data-tool="services" title="Build city services (6–9)"><i data-icon="services"></i><span>Services</span></button><div class="toolbar-divider"></div>
+  <button class="tool" data-tool="bulldoze" title="Bulldoze (B)"><i data-icon="bulldoze"></i><span>Bulldoze</span><small class="shortcut">B</small></button>
+</nav>
+<div class="ui clock-panel glass"><div class="clock-date"><i data-icon="calendar"></i><span id="date-label">MAY 09, YEAR 1</span></div><div class="clock-controls"><button class="speed-button" data-speed="0" title="Pause (Space)" aria-label="Pause"><i data-icon="pause"></i></button><button class="speed-button active" data-speed="1" title="Normal speed">1×</button><button class="speed-button" data-speed="2" title="Double speed">2×</button><button class="speed-button" data-speed="3" title="Triple speed">3×</button><div class="day-progress"><span id="day-progress"></span></div></div></div>
+<div class="ui demand-panel glass"><div class="eyebrow">A LITTLE ROOM FOR MORE</div><div class="demand-bars"><div class="demand-item" title="Residential demand"><div class="demand-bar r"><span id="demand-r-bar"></span></div><small>R<strong id="demand-r">50</strong></small></div><div class="demand-item" title="Commercial demand"><div class="demand-bar c"><span id="demand-c-bar"></span></div><small>C<strong id="demand-c">83</strong></small></div><div class="demand-item" title="Industrial demand"><div class="demand-bar i"><span id="demand-i-bar"></span></div><small>I<strong id="demand-i">95</strong></small></div></div></div>
+<footer class="ui footer"><span class="saved-status"><i data-icon="check"></i><span id="saved-label">Your city, your pace</span></span><span class="center-help"><kbd>Drag</kbd> Pan &nbsp; <kbd>Right drag</kbd> Orbit &nbsp; <kbd>Scroll</kbd> Zoom &nbsp; <kbd>Space</kbd> Pause</span><button class="about-footer" id="renderer-status" title="About the renderer">CANVAS · CONNECTING TO 3D</button></footer>
+<div class="photo-exit glass"><button id="download-photo"><i data-icon="download"></i>Save image</button><button id="exit-photo"><i data-icon="close"></i>Exit photo mode</button></div>
+<div class="toast-stack" id="toasts" aria-live="polite"></div>
+<div class="modal-shade" id="modal-shade"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><div><div class="eyebrow" id="modal-eyebrow">HARBOR CITY</div><h2 id="modal-title"></h2></div><button class="icon-btn" id="modal-close" aria-label="Close dialog" data-icon="close"></button></div><div id="modal-content"></div></section></div>
+<input type="file" id="import-file" accept=".json,application/json" hidden>
+<noscript><div class="noscript">Harbor City needs JavaScript enabled to run.</div></noscript>
+<script>/* Harbor City — deterministic simulation, deliberately independent of rendering. */
+(function (root) {
+  'use strict';
+  const N=48, CELL=4;
+  const TYPES=['empty','road','residential','commercial','industrial','park','power','water','fire','hospital'];
+  const ZONES=['residential','commercial','industrial'];
+  const COST={road:80,bridge:320,residential:20,commercial:25,industrial:30,park:600,power:4200,water:3600,fire:4800,hospital:7200,bulldoze:30};
+  const UPKEEP={park:55,power:180,water:160,fire:220,hospital:320};
+  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+  const riverCenter=z=>46+13*Math.sin(z/64);
+  const isWater=(x,z)=>Math.abs(x-riverCenter(z))<13.5;
+  const world=i=>(i-N/2+.5)*CELL;
+  const milestones=[{pop:1000,name:'Little town',reward:6000},{pop:2500,name:'Growing township',reward:12000},{pop:5000,name:'Thriving city',reward:20000},{pop:10000,name:'Regional capital',reward:35000},{pop:20000,name:'Metropolis',reward:60000}];
+  class CitySim {
+    constructor(starter=true) {
+      this.seed=73291; this.money=84260;this.day=128;this.tax=9;this.name='Harbor City';this.totalBuilt=0;
+      this.claimed=[];this.history=[];this.undoStack=[];this.events=[];this.revision=0;this.stats={};
+      this.cells=Array.from({length:N*N},(_,idx)=>({type:'empty',level:1,dense:false,occ:0,age:0,progress:0,seed:idx*913+41}));
+      if(starter)this.seedCity();this.recalculate();
+      if(starter)this.claimed=milestones.filter(m=>this.stats.population>=m.pop).map(m=>m.pop);
+      for(let i=0;i<20;i++)this.history.push({pop:Math.round(this.stats.population*(.8+i*.01)),net:this.stats.net});
+    }
+    random(){let t=this.seed+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;}
+    index(x,z){return z*N+x;}
+    inBounds(x,z){return x>=0&&x<N&&z>=0&&z<N;}
+    at(x,z){return this.inBounds(x,z)?this.cells[this.index(x,z)]:null;}
+    water(x,z){return isWater(world(x),world(z));}
+    seedCity(){
+      const road=(x,z)=>{if(this.inBounds(x,z))this.at(x,z).type='road';};
+      for(const z of [10,16,22,28,34])for(let x=6;x<=27;x++)road(x,z);
+      for(const x of [7,13,19,25])for(let z=10;z<=34;z++)road(x,z);
+      for(let x=0;x<=43;x++)road(x,16);
+      for(let z=12;z<=26;z++)road(41,z);
+      const put=(x,z,type,level=1,dense=false)=>{Object.assign(this.at(x,z),{type,level,dense,occ:.66+this.random()*.3,age:30,progress:0});};
+      for(let z=11;z<34;z++)for(let x=8;x<27;x++){
+        if(this.at(x,z).type!=='empty'||this.water(x,z))continue;
+        const d=Math.min(...[7,13,19,25].map(v=>Math.abs(v-x)),...[10,16,22,28,34].map(v=>Math.abs(v-z)));
+        if(d>2||this.random()<.23)continue;
+        const central=x>=14&&x<=24&&z>=17&&z<=27;
+        let type=(x<13&&z<16)?'industrial':(central&&this.random()<.46?'commercial':'residential');
+        let dense=central && this.random()<.74;
+        put(x,z,type,dense?(this.random()<.38?3:2):1,dense);
+      }
+      for(const [x,z,t] of [[9,12,'power'],[11,12,'power'],[8,30,'water'],[15,27,'water'],[18,21,'park'],[17,21,'park'],[18,20,'park'],[17,20,'park'],[12,24,'park'],[20,29,'park'],[24,21,'fire'],[14,23,'hospital']])put(x,z,t);
+      for(let z=18;z<25;z++)for(let x=40;x<=42;x++)if(this.at(x,z).type==='empty'&&!this.water(x,z)&&this.random()>.25)put(x,z,'residential');
+      // A small unfinished neighborhood gives the player an immediate expansion site.
+      for(let x=8;x<=11;x++)for(let z=35;z<=36;z++)put(x,z,'residential',0,false);
+    }
+    neighbors(idx){const x=idx%N,z=(idx/N)|0;return [[x-1,z],[x+1,z],[x,z-1],[x,z+1]].filter(([a,b])=>this.inBounds(a,b)).map(([a,b])=>this.index(a,b));}
+    recalculate(){
+      this.connected=new Uint8Array(N*N);
+      let queue=[]; // Connections to the region are at the west and east map boundaries.
+      for(let z=0;z<N;z++)for(const x of [0,N-1])if(this.at(x,z).type==='road'){let i=this.index(x,z);this.connected[i]=1;queue.push(i);}
+      for(let qi=0;qi<queue.length;qi++)for(const n of this.neighbors(queue[qi]))if(!this.connected[n]&&this.cells[n].type==='road'){this.connected[n]=1;queue.push(n);}
+      this.access=new Uint8Array(N*N);
+      for(const i of queue){let x=i%N,z=(i/N)|0;for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++)if(Math.abs(dx)+Math.abs(dz)<=2&&this.inBounds(x+dx,z+dz))this.access[this.index(x+dx,z+dz)]=1;}
+      let population=0,housing=0,jobs=0,commercial=0,industrial=0,roads=0,buildings=0,activeBuildings=0,emptyZones=0;
+      let services={power:0,water:0,park:0,fire:0,hospital:0},upkeep=420;
+      for(let i=0;i<this.cells.length;i++){
+        const c=this.cells[i];
+        if(c.type==='road'){roads++;continue;}
+        if(UPKEEP[c.type]){upkeep+=UPKEEP[c.type];if(this.access[i])services[c.type]++;}
+        if(!ZONES.includes(c.type))continue;
+        if(!c.level){emptyZones++;continue;}buildings++;if(this.access[i])activeBuildings++;
+        const cap=this.capacity(c);
+        if(c.type==='residential'){housing+=cap;population+=Math.floor(cap*c.occ);}
+        else if(this.access[i]){let j=Math.floor(cap*c.occ);jobs+=j;if(c.type==='commercial')commercial+=j;else industrial+=j;}
+      }
+      const powerNeed=buildings*3+population*.095+jobs*.11;
+      const waterNeed=population+jobs*.4;
+      let power=clamp(services.power*1050/Math.max(1,powerNeed),0,1);
+      let water=clamp(services.water*3300/Math.max(1,waterNeed),0,1);
+      if(this.money<0){power*=.8;water*=.8;}
+      const employment=clamp(jobs/Math.max(1,population*.43),0,1);
+      const connectivity=buildings?activeBuildings/buildings:1;
+      const happiness=Math.round(clamp(48+power*11+water*11+employment*10+Math.min(7,services.park*1.3)+Math.min(4,services.fire*2)+Math.min(4,services.hospital*2)-(this.tax-9)*3-(1-connectivity)*30-(industrial/Math.max(1,population)>.3?7:0),10,99));
+      const income=Math.round((population*1.32+jobs*1.8)*(this.tax/9));
+      const expenses=Math.round(upkeep+roads*3.4);const net=income-expenses;
+      const demand={residential:Math.round(clamp(60+(jobs-population*.42)*.045-(this.tax-9)*4-(1-power)*45-(1-water)*45,5,95)),commercial:Math.round(clamp(30+population*.043-commercial*.1,5,95)),industrial:Math.round(clamp(50+population*.021-industrial*.12,5,95))};
+      const traffic=Math.round(clamp(96-population/Math.max(20,roads)*1.15,30,98));
+      this.stats={population,housing,jobs,commercial,industrial,roads,buildings,emptyZones,services,powerNeed,waterNeed,powerCapacity:services.power*1050,waterCapacity:services.water*3300,power,water,employment,happiness,income,expenses,net,demand,traffic,connectivity};
+      return this.stats;
+    }
+    capacity(c){if(c.type==='residential')return c.dense?38+c.level*28:10+c.level*8;if(c.type==='commercial')return c.dense?24+c.level*16:10+c.level*6;return 14+c.level*7;}
+    proximity(i,type,radius){const x=i%N,z=(i/N)|0;for(let dz=-radius;dz<=radius;dz++)for(let dx=-radius;dx<=radius;dx++){let c=this.at(x+dx,z+dz);if(c&&c.type===type&&dx*dx+dz*dz<=radius*radius)return true;}return false;}
+    tick(){
+      this.day++;this.recalculate();const s=this.stats;
+      this.money+=s.net/7;let changed=false;
+      for(let i=0;i<this.cells.length;i++){
+        const c=this.cells[i];if(!ZONES.includes(c.type))continue;
+        if(!this.access[i]||s.power<.1||s.water<.1){c.occ=Math.max(0,c.occ-.015);continue;}
+        if(!c.level){
+          if(s.demand[c.type]>12&&s.power>.35&&s.water>.35&&this.money>=0){c.progress+=.55+this.random()*.6;if(c.progress>=4){c.level=1;c.occ=.12;c.age=0;this.totalBuilt++;changed=true;}}
+        }else{
+          c.age++;const growth=(s.happiness-40)/2200;
+          const employmentPenalty=c.type==='residential'&&s.employment<.65?.4:1;
+          c.occ=clamp(c.occ+growth*employmentPenalty*(s.demand[c.type]/70),.05,1);
+          const max=c.dense?3:2;
+          if(c.level<max&&c.age>35*c.level&&c.occ>.9&&s.happiness>70&&this.random()<.06&&(c.dense||this.proximity(i,'park',5))){c.level++;c.occ*=.8;c.age=0;changed=true;}
+        }
+      }
+      this.recalculate();if(changed)this.revision++;
+      if(this.day%7===0){this.history.push({pop:this.stats.population,net:this.stats.net});if(this.history.length>40)this.history.shift();}
+      for(const m of milestones)if(this.stats.population>=m.pop&&!this.claimed.includes(m.pop)){this.claimed.push(m.pop);this.money+=m.reward;this.events.push({title:m.name+'!',text:`${m.pop.toLocaleString()} residents. A $${m.reward.toLocaleString()} development grant is yours.`});}
+    }
+    quote(x,z,tool,dense=false){
+      if(!this.inBounds(x,z))return {ok:false,cost:0,reason:'Outside the city boundary'};
+      const c=this.at(x,z),wet=this.water(x,z);
+      if(tool==='bulldoze')return c.type==='empty'?{ok:false,cost:0,reason:'Nothing to remove'}:{ok:true,cost:COST.bulldoze};
+      if(!TYPES.includes(tool)||tool==='empty')return {ok:false,cost:0,reason:'Choose a building tool'};
+      if(wet&&tool!=='road')return {ok:false,cost:0,reason:'Only bridges can be built on water'};
+      if(c.type===tool&&(tool!=='residential'&&tool!=='commercial'||c.dense===dense))return {ok:false,cost:0,reason:'Already built'};
+      if(c.type!=='empty')return {ok:false,cost:0,reason:'Bulldoze this tile first'};
+      const cost=tool==='road'&&wet?COST.bridge:COST[tool];
+      return {ok:true,cost,reason:''};
+    }
+    build(points,tool,dense=false){
+      const unique=new Map(points.filter(p=>this.inBounds(p.x,p.z)).map(p=>[this.index(p.x,p.z),p]));
+      const valid=[];let cost=0;
+      for(const [i,p]of unique){const q=this.quote(p.x,p.z,tool,dense);if(q.ok){valid.push({i,p,cost:q.cost});cost+=q.cost;}}
+      if(!valid.length)return {ok:false,reason:points.length?this.quote(points[0].x,points[0].z,tool,dense).reason:'No valid tiles'};
+      if(this.money<cost)return {ok:false,reason:`Not enough funds. This costs $${cost.toLocaleString()}.`};
+      const undo={cost,cells:valid.map(({i})=>({i,cell:{...this.cells[i]}}))};
+      for(const {i}of valid){const old=this.cells[i];this.cells[i]={type:tool==='bulldoze'?'empty':tool,level:ZONES.includes(tool)?0:1,dense:!!dense,occ:0,age:0,progress:0,seed:old.seed};}
+      this.money-=cost;this.undoStack.push(undo);if(this.undoStack.length>30)this.undoStack.shift();this.revision++;this.recalculate();
+      return {ok:true,count:valid.length,cost};
+    }
+    undo(){const a=this.undoStack.pop();if(!a)return false;for(const {i,cell}of a.cells)this.cells[i]={...cell};this.money+=a.cost;this.revision++;this.recalculate();return true;}
+    serialize(){return JSON.stringify({version:1,N,name:this.name,seed:this.seed,money:this.money,day:this.day,tax:this.tax,claimed:this.claimed,cells:this.cells,totalBuilt:this.totalBuilt,history:this.history});}
+    static deserialize(text){
+      if(typeof text!=='string'||text.length>2000000)throw Error('The save file is too large.');
+      let o;try{o=JSON.parse(text);}catch{throw Error('This is not a valid JSON save.');}
+      if(o.version!==1||o.N!==N||!Array.isArray(o.cells)||o.cells.length!==N*N)throw Error('This save is not compatible with Harbor City.');
+      for(const k of ['money','day','tax','seed'])if(!Number.isFinite(o[k]))throw Error('Save contains invalid city data.');
+      if(o.money < -1e9||o.money>1e12||o.day<0||o.day>1e8||o.tax<5||o.tax>18)throw Error('Save data is out of range.');
+      for(let i=0;i<o.cells.length;i++){const c=o.cells[i];if(!c||!TYPES.includes(c.type)||!Number.isInteger(c.level)||c.level<0||c.level>3||typeof c.dense!=='boolean'||!Number.isFinite(c.occ)||c.occ<0||c.occ>1||!Number.isFinite(c.age)||c.age<0||!Number.isFinite(c.progress)||c.progress<0||!Number.isSafeInteger(c.seed)||c.seed<0||c.seed>0xffffffff||c.age>1e9||c.progress>1e6)throw Error('Save contains invalid building data.');if(isWater(world(i%N),world((i/N)|0))&&!['road','empty'].includes(c.type))throw Error('Save contains a building on water.');}
+      const sim=new CitySim(false);Object.assign(sim,{name:String(o.name||'Harbor City').slice(0,32),seed:o.seed,money:o.money,day:Math.floor(o.day),tax:o.tax,claimed:Array.isArray(o.claimed)?o.claimed.filter(v=>milestones.some(m=>m.pop===v)):[],totalBuilt:Number.isFinite(o.totalBuilt)?Math.max(0,o.totalBuilt):0});
+      sim.cells=o.cells.map(c=>({type:c.type,level:c.level,dense:c.dense,occ:c.occ,age:c.age,progress:c.progress,seed:c.seed}));
+      sim.history=Array.isArray(o.history)?o.history.filter(h=>h&&Number.isFinite(h.pop)&&h.pop>=0&&h.pop<=1e9&&Number.isFinite(h.net)&&Math.abs(h.net)<=1e12).slice(-40):[];sim.recalculate();sim.revision++;return sim;
+    }
+  }
+  function line(a,b){let points=[],x=a.x,z=a.z,dx=Math.abs(b.x-x),dz=Math.abs(b.z-z),sx=x<b.x?1:-1,sz=z<b.z?1:-1;/* Orthogonal L-shaped streets stay connected. */if(dx>=dz){while(x!==b.x){points.push({x,z});x+=sx;}while(z!==b.z){points.push({x,z});z+=sz;}}else{while(z!==b.z){points.push({x,z});z+=sz;}while(x!==b.x){points.push({x,z});x+=sx;}}points.push({x,z});return points;}
+  const api={CitySim,N,CELL,COST,UPKEEP,TYPES,ZONES,clamp,world,riverCenter,isWater,milestones,line};root.HC=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
+})(typeof window!=='undefined'?window:globalThis);
+</script><script>/* One world model, with Three.js instancing and an offline canvas fallback. */
+(function(root){
+'use strict';
+const {N,CELL,world,riverCenter,isWater,clamp,ZONES}=HC;
+const colors={residential:0x82be91,commercial:0x73b4d1,industrial:0xe0ba70,road:0x686f72,park:0x69a779,power:0xe7bf6c,water:0x70bbcf,fire:0xe38370,hospital:0x92afca};
+const rand=n=>{let x=Math.sin(n*127.1+311.7)*43758.5453123;return x-Math.floor(x);};
+const rgb=n=>[(n>>16)&255,(n>>8)&255,n&255];
+const hex=n=>'#'+Math.round(n).toString(16).padStart(6,'0');
+const shade=(n,k)=>{const a=rgb(n).map(x=>clamp(Math.round(x*k),0,255));return (a[0]<<16)|(a[1]<<8)|a[2];};
+class CityView {
+  constructor(host,sim){
+    this.host=host;this.sim=sim;this.yaw=.64;this.pitch=.67;this.target={x:-20,z:0};this.zoom=1;this.layer='none';this.grid=false;this.night=false;this.mode='canvas';this.time=0;this.dirty=true;this.cars=[];this.rotors=[];this.selected=-1;this.preview=[];this.W=innerWidth;this.H=innerHeight;this.lastDraw=0;
+    this.canvas=document.createElement('canvas');this.canvas.setAttribute('aria-label','Interactive city map');this.canvas.tabIndex=0;host.appendChild(this.canvas);this.ctx=this.canvas.getContext('2d',{alpha:false});this.resize();
+    this.terrain=this.makeTerrain();this.rebuild(sim);this.loadThree();
+  }
+  async loadThree(){
+    const fallbackTimer=setTimeout(()=>{if(this.mode!=='three')document.dispatchEvent(new CustomEvent('rendererready',{detail:'Offline canvas renderer'}));},5000);
+    try{
+      const T=await Promise.any([
+        import('https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js'),
+        import('https://unpkg.com/three@0.185.0/build/three.module.js')
+      ]);
+      clearTimeout(fallbackTimer);this.initThree(T);this.mode='three';this.canvas.style.display='none';this.dirty=true;
+      document.dispatchEvent(new CustomEvent('rendererready',{detail:'Three.js · WebGL'}));
+    }catch(e){clearTimeout(fallbackTimer);if(this.renderer){this.renderer.domElement.remove();this.renderer.dispose();this.renderer=null;this.scene=null;}this.canvas.style.display='block';this.mode='canvas';document.dispatchEvent(new CustomEvent('rendererready',{detail:'Offline canvas renderer'}));console.info('Harbor City: using the offline renderer. Three.js will be available with a network connection.');}
+  }
+  initThree(T){
+    this.T=T;
+    let renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));renderer.setSize(this.W,this.H);
+    renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;
+    renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+    renderer.domElement.setAttribute('aria-label','Interactive Three.js city map');renderer.domElement.tabIndex=0;
+    this.host.appendChild(renderer.domElement);this.renderer=renderer;
+    const scene=new T.Scene();scene.background=new T.Color(0xd5e3de);scene.fog=new T.Fog(0xd5e3de,620,1250);this.scene=scene;
+    this.camera=new T.OrthographicCamera(-100,100,100,-100,.1,1600);
+    this.ambient=new T.HemisphereLight(0xf4fbff,0x92966d,2);scene.add(this.ambient);
+    this.sun=new T.DirectionalLight(0xfff3d6,3.4);this.sun.position.set(-90,150,70);this.sun.target.position.set(-15,0,0);scene.add(this.sun.target);scene.add(this.sun);
+    this.sun.castShadow=true;this.sun.shadow.mapSize.set(2048,2048);Object.assign(this.sun.shadow.camera,{left:-155,right:155,top:155,bottom:-155,near:1,far:400});this.sun.shadow.normalBias=.16;this.sun.shadow.bias=-.00015;
+    this.geometries={box:new T.BoxGeometry(1,1,1),sphere:new T.IcosahedronGeometry(.5,1),cone:new T.ConeGeometry(.5,1,7),pyramid:new T.ConeGeometry(Math.SQRT1_2,1,4),cylinder:new T.CylinderGeometry(.5,.5,1,10)};
+    this.material=new T.MeshStandardMaterial({roughness:.88,metalness:.06});this.windowMaterial=new T.MeshStandardMaterial({roughness:.4,metalness:.1,emissive:0xffd78c,emissiveIntensity:0});
+    this.matrix=new T.Object3D();this.color=new T.Color();this.terrainGroup=this.makeThreeGroup(this.terrain);scene.add(this.terrainGroup);
+    this.cityGroup=this.makeThreeGroup(this.shapes);scene.add(this.cityGroup);
+    this.dynamicGroup=this.makeThreeGroup(this.dynamicShapes(),true);scene.add(this.dynamicGroup);
+    this.previewGroup=new T.Group();scene.add(this.previewGroup);this.syncCamera();this.applyLighting();
+    this.raycaster=new T.Raycaster();
+    renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.canvas.style.display='block';renderer.domElement.style.display='none';this.mode='canvas';this.dirty=true;document.dispatchEvent(new CustomEvent('rendererready',{detail:'Offline canvas renderer'}));});
+  }
+  makeThreeGroup(shapes,dynamic=false){
+    const T=this.T,group=new T.Group(),kinds={};
+    for(const s of shapes){if(s.kind==='poly'){
+      const geo=new T.BufferGeometry(),v=[];for(let i=1;i<s.points.length-1;i++)for(const p of [s.points[0],s.points[i],s.points[i+1]])v.push(...p);geo.setAttribute('position',new T.Float32BufferAttribute(v,3));geo.computeVertexNormals();
+      const mat=new T.MeshStandardMaterial({color:s.c,roughness:s.water?.28:1,metalness:s.water?.18:0,side:T.DoubleSide,transparent:!!s.alpha,opacity:s.alpha||1});const m=new T.Mesh(geo,mat);m.receiveShadow=true;m.userData.owned=true;group.add(m);continue;
+    }const key=s.kind+(s.glow?'_glow':'');(kinds[key]||(kinds[key]=[])).push(s);}
+    for(const [key,list]of Object.entries(kinds)){
+      const mesh=new T.InstancedMesh(this.geometries[list[0].kind],key.endsWith('_glow')?this.windowMaterial:this.material,dynamic?Math.max(list.length,600):list.length);
+      mesh.count=list.length;mesh.castShadow=!key.endsWith('_glow');mesh.receiveShadow=true;mesh.userData.shapes=list;mesh.userData.key=key;mesh.frustumCulled=false;
+      for(let i=0;i<list.length;i++)this.setInstance(mesh,i,list[i]);mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;group.add(mesh);
+    }return group;
+  }
+  setInstance(mesh,i,s){const d=this.matrix;d.position.set(s.x,s.y,s.z);d.rotation.set(s.rx||0,(s.ry||0)+(s.kind==='pyramid'?Math.PI/4:0),s.rz||0);d.scale.set(s.w,s.h,s.d);d.updateMatrix();mesh.setMatrixAt(i,d.matrix);mesh.setColorAt(i,this.color.setHex(s.c));}
+  disposeGroup(g){if(!g)return;this.scene.remove(g);g.traverse(m=>{if(m.userData.owned){m.geometry.dispose();m.material.dispose();}if(m.isInstancedMesh&&m.dispose)m.dispose();});}
+  resize(){this.W=innerWidth;this.H=innerHeight;this.ratio=Math.min(devicePixelRatio||1,1.5);this.canvas.width=Math.round(this.W*this.ratio);this.canvas.height=Math.round(this.H*this.ratio);this.canvas.style.width=this.W+'px';this.canvas.style.height=this.H+'px';this.scale=Math.max(2.2,this.H/154)*this.zoom;this.offsetX=this.W>950?48:0;this.offsetY=28;this.dirty=true;if(this.renderer){this.renderer.setSize(this.W,this.H);this.syncCamera();}}
+  syncCamera(){if(!this.camera)return;const c=this.camera,w=this.W/this.scale,h=this.H/this.scale,ox=this.offsetX/this.scale,oy=this.offsetY/this.scale;c.left=-w/2-ox;c.right=w/2-ox;c.top=h/2+oy;c.bottom=-h/2+oy;const cp=Math.cos(this.pitch),sp=Math.sin(this.pitch);c.position.set(this.target.x+Math.sin(this.yaw)*cp*500,sp*500,this.target.z+Math.cos(this.yaw)*cp*500);c.lookAt(this.target.x,0,this.target.z);c.updateProjectionMatrix();c.updateMatrixWorld();}
+  project(x,y,z){const dx=x-this.target.x,dz=z-this.target.z;return {x:this.W/2+this.offsetX+(dx*Math.cos(this.yaw)-dz*Math.sin(this.yaw))*this.scale,y:this.H/2+this.offsetY+(dx*Math.sin(this.yaw)*Math.sin(this.pitch)+dz*Math.cos(this.yaw)*Math.sin(this.pitch)-y*Math.cos(this.pitch))*this.scale};}
+  ground(px,py){const sx=(px-this.W/2-this.offsetX)/this.scale,sz=(py-this.H/2-this.offsetY)/(this.scale*Math.sin(this.pitch));return{x:this.target.x+Math.cos(this.yaw)*sx+Math.sin(this.yaw)*sz,z:this.target.z-Math.sin(this.yaw)*sx+Math.cos(this.yaw)*sz};}
+  pick(px,py,inspect=false){if(inspect&&this.mode==='three'&&this.cityGroup){this.raycaster.setFromCamera({x:px/this.W*2-1,y:1-py/this.H*2},this.camera);const hits=this.raycaster.intersectObjects(this.cityGroup.children,false);for(const h of hits){let s=h.object.userData.shapes?.[h.instanceId];if(s&&s.owner>=0)return{x:s.owner%N,z:Math.floor(s.owner/N)};}}const p=this.ground(px,py);return {x:Math.floor(p.x/CELL+N/2),z:Math.floor(p.z/CELL+N/2)};}
+  pan(dx,dy){const a=this.ground(this.W/2,this.H/2),b=this.ground(this.W/2+dx,this.H/2+dy);this.target.x=clamp(this.target.x-(b.x-a.x),-125,125);this.target.z=clamp(this.target.z-(b.z-a.z),-125,125);this.syncCamera();this.dirty=true;}
+  orbit(dx,dy){this.yaw-=dx*.006;this.pitch=clamp(this.pitch+dy*.003,.38,1.2);this.syncCamera();this.dirty=true;}
+  zoomBy(delta){this.zoom=clamp(this.zoom*Math.exp(delta),.48,3.4);this.resize();}
+  home(){this.target={x:-20,z:0};this.yaw=.64;this.pitch=.67;this.zoom=1;this.resize();}
+  focus(x,z){this.target={x,z};this.syncCamera();this.dirty=true;}
+  makeTerrain(){
+    const s=[];const poly=(points,c,extra={})=>s.push({kind:'poly',points,c,base:true,...extra});
+    poly([[-800,-.07,-800],[-800,-.07,800],[800,-.07,800],[800,-.07,-800]],0xb4c8a0);
+    for(let z=-650;z<650;z+=10){const c1=riverCenter(z),c2=riverCenter(z+10);poly([[c1-17,.015,z],[c2-17,.015,z+10],[c2+17,.015,z+10],[c1+17,.015,z]],0xd3cfb1);poly([[c1-13.7,.04,z],[c2-13.7,.04,z+10],[c2+13.7,.04,z+10],[c1+13.7,.04,z]],0x75b8bd,{water:true});}
+    // Quiet wooded hills frame the buildable valley.
+    for(let i=0;i<36;i++){let a=rand(i+11)*Math.PI*2,r=160+rand(i+35)*170,x=Math.cos(a)*r,z=Math.sin(a)*r;if(isWater(x,z)||Math.abs(x-riverCenter(z))<40)continue;s.push({kind:'cone',x,y:7,z,w:75+rand(i+12)*60,h:14+rand(i+15)*35,d:80+rand(i)*50,c:[0xa4bc96,0xaec3a0,0x9db992][i%3],owner:-1});}
+    for(let i=0;i<270;i++){let x=rand(i*3+160)*420-210,z=rand(i*3+90)*420-210;if((Math.abs(x)<98&&Math.abs(z)<98)||isWater(x,z)||Math.abs(x-riverCenter(z))<18)continue;this.tree(s,x,z,.8+rand(i+7)*1.1,i);}
+    // Regional arterial visibly continues off-map.
+    s.push({kind:'box',x:-188,y:.1,z:world(16),w:184,h:.2,d:3.6,c:0x707877,base:true,owner:-1});
+    for(let x=-277;x<-96;x+=6)s.push({kind:'box',x,y:.22,z:world(16),w:2,h:.02,d:.06,c:0xe9dfb4,base:true,owner:-1});
+    // Small moving-water highlights, understated rather than noisy.
+    for(let i=0;i<130;i++){const z=rand(i+500)*380-190,x=riverCenter(z)+(rand(i+110)-.5)*21;s.push({kind:'box',x,y:.055,z,w:1.4+rand(i)*2,h:.01,d:.06,c:0x9acdd0,base:true,owner:-1});}
+    return s;
+  }
+  tree(s,x,z,size,seed,owner=-1){
+    const color=[0x659c77,0x77a780,0x4f8d6c,0x86ad7e][Math.floor(rand(seed+17)*4)];
+    s.push({kind:'cylinder',x,y:1.1*size,z,w:.25*size,h:2.2*size,d:.25*size,c:0x8f8b69,owner});
+    if(rand(seed+73)>.55){s.push({kind:'cone',x,y:2.65*size,z,w:2.45*size,h:3.5*size,d:2.45*size,c:color,owner});s.push({kind:'cone',x,y:3.65*size,z,w:1.75*size,h:2.6*size,d:1.75*size,c:shade(color,1.07),owner});}
+    else s.push({kind:'sphere',x,y:2.65*size,z,w:2.8*size,h:3.2*size,d:2.8*size,c:color,owner});
+  }
+  rebuild(sim){
+    this.sim=sim;this.shapes=[];this.rotors=[];const s=this.shapes;
+    const box=(x,y,z,w,h,d,c,extra={})=>s.push({kind:'box',x,y,z,w,h,d,c,owner:this.owner,...extra});
+    for(let z=0;z<N;z++)for(let x=0;x<N;x++){
+      const i=z*N+x,c=sim.cells[i],wx=world(x),wz=world(z),r=rand(c.seed);this.owner=i;
+      if(c.type==='empty'){
+        if(!sim.water(x,z)&&Math.abs(wx-riverCenter(wz))>16&&r>.68){const busy=x>5&&x<29&&z>8&&z<36;if(!busy||r>.91)this.tree(s,wx+(r-.5),wz+rand(c.seed+3)-.5,busy?.55:.7+rand(c.seed+42)*.45,c.seed,i);}
+        continue;
+      }
+      if(c.type==='road'){
+        const wet=sim.water(x,z),y=wet?.48:.17;const L=sim.at(x-1,z)?.type==='road',R=sim.at(x+1,z)?.type==='road',U=sim.at(x,z-1)?.type==='road',D=sim.at(x,z+1)?.type==='road';
+        const deg=[L,R,U,D].filter(Boolean).length;
+        box(wx,y-.05,wz,4,.18,4,wet?0xb9bcaa:0xcecdbb,{base:true});box(wx,y+.055,wz,3.24,.05,3.24,0x737c7b,{base:true});
+        if(L)box(wx-1.65,y+.056,wz,.7,.052,3.24,0x737c7b,{base:true});if(R)box(wx+1.65,y+.056,wz,.7,.052,3.24,0x737c7b,{base:true});if(U)box(wx,y+.056,wz-1.65,3.24,.052,.7,0x737c7b,{base:true});if(D)box(wx,y+.056,wz+1.65,3.24,.052,.7,0x737c7b,{base:true});
+        if(deg<=2){if(L||R)box(wx,y+.09,wz,1.15,.015,.055,0xe5dab1,{base:true});if(U||D)box(wx,y+.09,wz,.055,.015,1.15,0xe5dab1,{base:true});}
+        if(deg>2){for(let k=-2;k<=2;k++){if(U)box(wx+k*.42,y+.091,wz-1.22,.24,.014,.48,0xdfdfca,{base:true,detail:true});if(D)box(wx+k*.42,y+.091,wz+1.22,.24,.014,.48,0xdfdfca,{base:true,detail:true});if(L)box(wx-1.22,y+.091,wz+k*.42,.48,.014,.24,0xdfdfca,{base:true,detail:true});if(R)box(wx+1.22,y+.091,wz+k*.42,.48,.014,.24,0xdfdfca,{base:true,detail:true});}}
+        if(wet){box(wx,1.03,wz-1.9,4,.14,.12,0xd9dbc9);box(wx,1.03,wz+1.9,4,.14,.12,0xd9dbc9);if(x%2===0){box(wx,-.12,wz-1.55,.32,1.3,.4,0xa8afa0);box(wx,-.12,wz+1.55,.32,1.3,.4,0xa8afa0);}}
+        if(!wet&&(x+z)%7===0){box(wx+1.67,1.85,wz+1.67,.08,3.3,.08,0x606d68);box(wx+1.38,3.47,wz+1.67,.6,.12,.19,0xf0e5be,{glow:true});}
+        continue;
+      }
+      let pavement=c.type==='park'?0x8eb184:0xcbd0b9;
+      box(wx,.12,wz,3.85,.12,3.85,pavement,{base:true});
+      if(ZONES.includes(c.type)){
+        if(!c.level){box(wx,.21,wz,3.5,.055,3.5,colors[c.type],{base:true});box(wx,.235,wz,.05,.035,3.5,0xdbe7d2,{base:true});box(wx,.235,wz,3.5,.035,.05,0xdbe7d2,{base:true});continue;}
+        if(c.type==='industrial'){
+          const h=2+rand(c.seed+4)*1.6;box(wx,h/2+.2,wz,3.2,h,2.8,[0xc6b794,0xa3b2aa,0xb8aa8b][i%3]);box(wx,h+.35,wz,3.4,.32,3,0xa5aba0);
+          box(wx+.9,h+1.2,wz-.7,.4,2,.4,0xa9937b);box(wx-.7,1,wz+1.42,1.15,1.5,.05,0x7b9195);box(wx-.8,h+.65,wz-.5,.9,.6,.9,0x869f9f);box(wx+1,.4,wz+1.55,.55,.45,.42,0xd9b774);continue;
+        }
+        const tall=c.dense;
+        if(!tall&&c.type==='residential'){
+          const h=c.level===1?1.9+r*.65:4.1;const w=2.3+rand(c.seed+7)*.45,d=2.6;
+          const wall=[0xe8dfc8,0xead7bd,0xdadfcd,0xd4dccc,0xead7cc][i%5];box(wx,h/2+.2,wz,w,h,d,wall);
+          if(c.level===1)s.push({kind:'pyramid',x:wx,y:h+.85,z:wz,w:w+.4,h:1.3,d:d+.4,c:[0xb77e65,0x83938a,0xb3a287,0x767f7a][i%4],owner:i});else box(wx,h+.32,wz,w+.2,.25,d+.2,0xb9b9a4);
+          for(let row=0;row<c.level;row++)for(let side of [-1,1]){box(wx+side*.67,.95+row*1.8,wz+d/2+.03,.5,.66,.055,0x799c9e,{detail:true,glow:true});box(wx+w/2+.03,.95+row*1.8,wz+side*.7,.055,.66,.5,0x799c9e,{detail:true,glow:true});}
+          box(wx,.63,wz+d/2+.05,.4,.95,.09,0xb69877,{detail:true});box(wx,.2,wz+1.66,.65,.04,.7,0xe1dbbf,{base:true});if(r>.5)this.tree(s,wx-1.25,wz+1.15,.43,c.seed,i);
+        }else{
+          const h=tall?(c.type==='commercial'?8+c.level*4+r*9:6+c.level*3.4+r*7):3.5+r*2.5;
+          const w=2.7+rand(c.seed+9)*.35,d=2.7+rand(c.seed+2)*.3;
+          const wall=c.type==='commercial'?[0x759b9f,0x7f9f9e,0x8aabaa,0x668b96][i%4]:[0xd9daca,0xe2dfcd,0xcdd7c9,0xe6dccc][i%4];
+          box(wx,.65,wz,3.5,.95,3.45,0xd5d6c3);box(wx,h/2+.6,wz,w,h,d,wall);
+          const floors=Math.min(13,Math.max(2,Math.floor(h/1.55))),step=h/(floors+.3);
+          for(let f=1;f<=floors;f++){
+            let fy=.7+f*step;
+            if(c.type==='commercial'){
+              box(wx,fy,wz+d/2+.025,w+.055,.085,.075,0xc2d0c4,{detail:true});box(wx,fy,wz-d/2-.025,w+.055,.085,.075,0xc2d0c4,{detail:true});box(wx+w/2+.025,fy,wz,.075,.085,d+.05,0xc2d0c4,{detail:true});box(wx-w/2-.025,fy,wz,.075,.085,d+.05,0xc2d0c4,{detail:true});
+            }else{
+              box(wx,fy,wz+d/2+.04,w*.77,.6,.06,0x8da6a0,{detail:true,glow:true});box(wx+w/2+.04,fy,wz,.06,.6,d*.77,0x8da6a0,{detail:true,glow:true});box(wx,fy,wz-d/2-.04,w*.77,.6,.06,0x8da6a0,{detail:true,glow:true});box(wx-w/2-.04,fy,wz,.06,.6,d*.77,0x8da6a0,{detail:true,glow:true});
+            }
+          }
+          if(c.type==='commercial'){for(const v of [-.6,.6]){box(wx+v,h/2+.6,wz+d/2+.04,.085,h,.075,0xb2c3b9,{detail:true});box(wx+w/2+.04,h/2+.6,wz+v,.075,h,.085,0xb2c3b9,{detail:true});}}
+          box(wx,h+.67,wz,w+.14,.2,d+.14,0xdfdfcc);box(wx-.5,h+1.1,wz-.5,.8,.7,.8,0xa2b3ae);
+          if(tall&&r>.64){box(wx+.5,h+1.4,wz+.15,1.15,1.5,1.35,shade(wall,1.08));box(wx+.5,h+2.65,wz+.15,.06,1.4,.06,0xa2b4ad);}
+          if(!tall&&c.type==='commercial')box(wx,1.8,wz+1.6,3.1,.4,.45,[0xb97c62,0x7aab9e,0xd2b66d][i%3]);
+        }
+      }else if(c.type==='park'){
+        box(wx,.2,wz,3.85,.045,.6,0xd7d1b5,{base:true});box(wx,.2,wz,.6,.045,3.85,0xd7d1b5,{base:true});this.tree(s,wx-1,wz-.8,.72,c.seed,i);this.tree(s,wx+1,wz+.8,.6,c.seed+9,i);box(wx+.95,.45,wz-.95,1,.18,.38,0xa99169);box(wx+.95,.7,wz-1.13,1,.45,.1,0xb4996a);
+      }else if(c.type==='power'){
+        s.push({kind:'cylinder',x:wx,y:3.6,z:wz,w:.32,h:7,d:.32,c:0xe6e5d5,owner:i});box(wx,7.2,wz,.75,.5,.65,0xf0eddf);this.rotors.push({x:wx,y:7.2,z:wz+.42,phase:r*Math.PI*2});box(wx+.9,.5,wz+.7,.9,.7,.7,0xc6cfba);
+      }else if(c.type==='water'){
+        for(let a of [-1,1])for(let b of [-1,1])box(wx+a*.7,1.7,wz+b*.7,.15,3,.15,0xc9d5cc);
+        s.push({kind:'cylinder',x:wx,y:3.8,z:wz,w:2.8,h:2.4,d:2.8,c:0x9cbab8,owner:i});s.push({kind:'cone',x:wx,y:5.2,z:wz,w:2.9,h:.55,d:2.9,c:0xd4dfd2,owner:i});box(wx,3.8,wz+1.405,.6,1.1,.04,0x659ca7);
+      }else if(c.type==='fire'){
+        box(wx,1.65,wz,3.3,3,2.9,0xdccdb6);box(wx,3.22,wz,3.45,.2,3.05,0xb47762);for(let k of [-1,0,1])box(wx+k*.93,1.1,wz+1.47,.73,1.7,.05,0xc2745f);box(wx+1.1,3.8,wz-.8,.75,1.2,.8,0xdfd7bd);
+      }else if(c.type==='hospital'){
+        box(wx,2.5,wz,3.25,4.7,3.15,0xe7e7d6);box(wx,4.97,wz,3.4,.22,3.3,0x9dafb0);box(wx,3.7,wz+1.6,1.25,.3,.07,0xb8665e);box(wx,3.7,wz+1.6,.3,1.25,.08,0xb8665e);box(wx,1.3,wz+1.6,2.5,1.2,.05,0x7d9ca4,{glow:true});
+      }
+    }
+    this.makeOverlay();this.refreshRoutes();
+    if(this.scene){this.disposeGroup(this.cityGroup);this.cityGroup=this.makeThreeGroup(this.shapes);this.scene.add(this.cityGroup);this.updatePreviewThree();}
+    this.dirty=true;
+  }
+  makeOverlay(){
+    if(this.layer==='none'&&!this.grid)return;
+    for(let i=0;i<N*N;i++){
+      const c=this.sim.cells[i],x=world(i%N),z=world((i/N)|0);if(this.sim.water(i%N,(i/N)|0)&&c.type!=='road')continue;
+      let color=null;
+      if(this.layer==='zoning'&&c.type!=='empty')color=colors[c.type];
+      if(this.layer==='traffic'&&c.type==='road')color=this.sim.connected[i]?(this.sim.stats.traffic>70?0x81c097:0xe3b36d):0xe18b73;
+      if(this.layer==='services'&&c.type!=='empty'&&c.type!=='road')color=this.sim.access[i]&&this.sim.stats.power>.5&&this.sim.stats.water>.5?0x79bea0:0xe58a74;
+      if(color)this.shapes.push({kind:'box',x,y:.28,z,w:3.6,h:.055,d:3.6,c:color,base:true,owner:i});
+      if(this.grid&&c.type==='empty')for(const [w,d]of [[3.9,.025],[.025,3.9]])this.shapes.push({kind:'box',x:x-1.99*(w<1?1:0),y:.09,z:z-1.99*(d<1?1:0),w,h:.018,d,c:0x9db38c,base:true,owner:i});
+    }
+  }
+  setLayer(layer){this.layer=layer;this.rebuild(this.sim);}
+  setGrid(on){this.grid=on;this.rebuild(this.sim);}
+  setNight(on){this.night=on;this.applyLighting();this.dirty=true;}
+  applyLighting(){if(!this.scene)return;this.scene.background.setHex(this.night?0x233b47:0xd5e3de);this.scene.fog.color.copy(this.scene.background);this.ambient.intensity=this.night?.8:2;this.ambient.color.setHex(this.night?0x839fc0:0xf4fbff);this.sun.intensity=this.night?.55:3.4;this.sun.color.setHex(this.night?0x9ebedd:0xfff3d6);this.windowMaterial.emissiveIntensity=this.night?1.7:0;this.renderer.toneMappingExposure=this.night?.85:1.1;}
+  refreshRoutes(){
+    this.roads=[];this.adj=new Map();for(let i=0;i<N*N;i++)if(this.sim.cells[i].type==='road'&&this.sim.connected[i]){this.roads.push(i);this.adj.set(i,this.sim.neighbors(i).filter(n=>this.sim.cells[n].type==='road'&&this.sim.connected[n]));}
+    this.cars=this.cars.filter(c=>c.path.every(i=>this.adj.has(i)));const desired=clamp(Math.floor(this.sim.stats.population/70),8,85);
+    while(this.cars.length<desired&&this.roads.length>2){const c=this.newCar(this.cars.length);if(c)this.cars.push(c);else break;}
+  }
+  pathfind(start,end){
+    const prev=new Map([[start,-1]]),queue=[start];for(let q=0;q<queue.length;q++){const a=queue[q];if(a===end)break;for(const b of this.adj.get(a)||[])if(!prev.has(b)){prev.set(b,a);queue.push(b);}}
+    if(!prev.has(end))return[];const path=[];for(let p=end;p!==-1;p=prev.get(p))path.unshift(p);return path;
+  }
+  newCar(seed,start){
+    if(this.roads.length<3)return null;let a=start??this.roads[Math.floor(rand(seed+this.time*3+87)*this.roads.length)],b=this.roads[Math.floor(rand(seed*7+this.time+93)*this.roads.length)];let path=this.pathfind(a,b);if(path.length<2){b=this.roads[(this.roads.indexOf(a)+13)%this.roads.length];path=this.pathfind(a,b);}if(path.length<2)return null;
+    return{path,k:0,t:rand(seed+39),speed:1.7+rand(seed+3)*1.6,color:[0xf1e5c8,0xc98464,0x90aeba,0xd4b165,0x718b80,0xe6e1d3][seed%6],seed};
+  }
+  updateTraffic(dt,speed){
+    const occupancy=new Map();for(const c of this.cars){let key=c.path[c.k]+':'+c.path[c.k+1];if(!occupancy.has(key))occupancy.set(key,[]);occupancy.get(key).push(c.t);}
+    for(let n=0;n<this.cars.length;n++){
+      const c=this.cars[n];let a=c.path[c.k],b=c.path[c.k+1];if(b===undefined)continue;let dx=b%N-a%N,dz=((b/N)|0)-((a/N)|0),flow=1;
+      const ahead=occupancy.get(a+':'+b)?.some(t=>t>c.t&&t-c.t<.35);if(ahead)flow=.12;
+      const intersection=(this.adj.get(b)||[]).length>2,red=(Math.floor(this.time/5)+((b%N)%2))%2===(dx?1:0);if(intersection&&red&&c.t>.65&&c.t<.8)flow=0;
+      c.t+=dt*Math.min(speed,3)*c.speed/CELL*flow;
+      if(c.t>=1){c.t-=1;c.k++;if(c.k>=c.path.length-1){const nc=this.newCar(c.seed,b);if(nc){nc.color=c.color;nc.t=0;this.cars[n]=nc;}}}
+    }
+  }
+  dynamicShapes(){
+    const s=[];for(const c of this.cars){const a=c.path[c.k],b=c.path[c.k+1];if(b==null)continue;let ax=world(a%N),az=world((a/N)|0),bx=world(b%N),bz=world((b/N)|0),dx=(bx-ax)/CELL,dz=(bz-az)/CELL;const x=ax+(bx-ax)*c.t-dz*.57,z=az+(bz-az)*c.t+dx*.57,y=isWater(x,z)?.78:.47,ry=Math.atan2(dx,dz);
+      s.push({kind:'box',x,y,z,w:.65,h:.36,d:1.3,c:c.color,ry,owner:-1});s.push({kind:'box',x:x-dx*.06,y:y+.27,z:z-dz*.06,w:.55,h:.24,d:.65,c:0x66828a,ry,owner:-1});
+      if(this.night)s.push({kind:'box',x:x+dx*.66,y:y-.015,z:z+dz*.66,w:.54,h:.12,d:.05,c:0xffe3a0,ry,glow:true,owner:-1});
+    }
+    for(const t of this.rotors)for(let i=0;i<3;i++){const a=t.phase+this.time*.95+i*Math.PI*2/3;s.push({kind:'box',x:t.x+Math.cos(a)*1.35,y:t.y+Math.sin(a)*1.35,z:t.z,w:2.8,h:.17,d:.1,c:0xf2f0e2,rz:a,owner:-1});}
+    // Two leisure boats stay on their own open-water reaches, away from the bridge.
+    for(let i=0;i<2;i++){let z=(i?38:-82)+Math.sin(this.time*.035+i)*17,x=riverCenter(z)+(i?3:-3);s.push({kind:'box',x,y:.35,z,w:1.25,h:.48,d:3,c:0xebe6ce,owner:-1});s.push({kind:'box',x,y:.7,z:z-.1,w:1,h:.4,d:1.65,c:0xd4ba89,owner:-1});}
+    return s;
+  }
+  setPreview(points,tool,dense){this.preview=points.map(p=>({...p,valid:this.sim.quote(p.x,p.z,tool,dense).ok}));this.dirty=true;this.updatePreviewThree();}
+  updatePreviewThree(){if(!this.previewGroup)return;for(const m of [...this.previewGroup.children]){m.geometry.dispose();m.material.dispose();this.previewGroup.remove(m);}const T=this.T;const points=this.preview.length?this.preview:this.selected>=0?[{x:this.selected%N,z:Math.floor(this.selected/N),valid:true}]:[];
+    if(!points.length)return;const geometry=new T.BoxGeometry(3.95,.09,3.95),material=new T.MeshBasicMaterial({transparent:true,opacity:.46,depthWrite:false});const m=new T.InstancedMesh(geometry,material,points.length);const d=new T.Object3D();points.forEach((p,i)=>{d.position.set(world(p.x),this.sim.water(p.x,p.z)?.68:.34,world(p.z));d.updateMatrix();m.setMatrixAt(i,d.matrix);m.setColorAt(i,new T.Color(p.valid?0x52baa0:0xe57865));});m.renderOrder=5;this.previewGroup.add(m);
+  }
+  select(i){this.selected=i;this.updatePreviewThree();this.dirty=true;}
+  update(dt,speed){this.time+=dt*(speed?Math.min(speed,3):0);this.updateTraffic(dt,speed);if(this.mode==='three'){
+      const shapes=this.dynamicShapes(),buckets={};for(const s of shapes){let k=s.kind+(s.glow?'_glow':'');(buckets[k]||(buckets[k]=[])).push(s);}
+      // Recreate only when a new geometry/material bucket is needed (e.g. headlights).
+      if(Object.keys(buckets).some(k=>!this.dynamicGroup.children.some(m=>m.userData.key===k))){this.disposeGroup(this.dynamicGroup);this.dynamicGroup=this.makeThreeGroup(shapes,true);this.scene.add(this.dynamicGroup);}
+      else for(const m of this.dynamicGroup.children){let a=buckets[m.userData.key]||[];m.count=a.length;for(let i=0;i<a.length;i++)this.setInstance(m,i,a[i]);m.instanceMatrix.needsUpdate=true;if(m.instanceColor)m.instanceColor.needsUpdate=true;}
+      this.renderer.render(this.scene,this.camera);
+    }else if(this.dirty||performance.now()-this.lastDraw>95){this.drawCanvas();this.lastDraw=performance.now();this.dirty=false;}
+  }
+  polygon(ctx,points,fill,alpha=1){ctx.globalAlpha=alpha;ctx.fillStyle=fill;ctx.beginPath();for(let i=0;i<points.length;i++){const p=points[i];if(i)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);}ctx.closePath();ctx.fill();ctx.globalAlpha=1;}
+  shapeVertices(s){const vs=[];const ry=s.ry||0,rz=s.rz||0;for(let y of [-.5,.5])for(let z of [-.5,.5])for(let x of [-.5,.5]){let a=x*s.w,b=y*s.h,c=z*s.d;let rx=a*Math.cos(rz)-b*Math.sin(rz),by=a*Math.sin(rz)+b*Math.cos(rz);let ax=rx*Math.cos(ry)+c*Math.sin(ry),cz=-rx*Math.sin(ry)+c*Math.cos(ry);vs.push(this.project(s.x+ax,s.y+by,s.z+cz));}return vs;}
+  drawShape(s,ctx){
+    if(s.kind==='poly'){this.polygon(ctx,s.points.map(p=>this.project(...p)),hex(s.c),s.alpha||1);return;}
+    const p=this.project(s.x,s.y,s.z),bounds=(s.w+s.d+s.h)*this.scale;
+    if(p.x+bounds<0||p.x-bounds>this.W||p.y+bounds<0||p.y-bounds>this.H)return;
+    if(s.detail&&this.scale<3.4)return;
+    let col=s.c;if(this.night&&s.glow)col=0xf8d38d;
+    if(s.kind==='sphere'){
+      let rx=s.w*this.scale*.5,ry=s.h*this.scale*.48;
+      ctx.fillStyle=hex(shade(col,.88));ctx.beginPath();ctx.ellipse(p.x,p.y,rx,ry,0,0,Math.PI*2);ctx.fill();
+      const v=[];for(let a=0;a<6;a++)v.push({x:p.x+Math.cos(a*Math.PI/3)*rx*.92,y:p.y-ry*.2+Math.sin(a*Math.PI/3)*ry*.7});this.polygon(ctx,v,hex(shade(col,1.04)));return;
+    }
+    if(s.kind==='cone'||s.kind==='pyramid'){
+      const bottom=s.y-s.h/2,pts=[[s.x-s.w/2,bottom,s.z-s.d/2],[s.x+s.w/2,bottom,s.z-s.d/2],[s.x+s.w/2,bottom,s.z+s.d/2],[s.x-s.w/2,bottom,s.z+s.d/2]],peak=this.project(s.x,s.y+s.h/2,s.z);const cy=Math.cos(this.yaw),sy=Math.sin(this.yaw);
+      const fs=[];for(let i=0;i<4;i++){const a=pts[i],b=pts[(i+1)%4];fs.push({v:[this.project(...a),this.project(...b),peak],depth:(a[0]+b[0])*sy+(a[2]+b[2])*cy,c:shade(col,[.91,.86,1.04,1.12][i])});}fs.sort((a,b)=>a.depth-b.depth);for(const f of fs)this.polygon(ctx,f.v,hex(f.c));return;
+    }
+    const v=this.shapeVertices(s); // bit order x, z, y
+    const faces=[{idx:[0,1,5,4],n:[0,0,-1],k:.87},{idx:[2,3,7,6],n:[0,0,1],k:.97},{idx:[0,2,6,4],n:[-1,0,0],k:1.03},{idx:[1,3,7,5],n:[1,0,0],k:.81},{idx:[4,5,7,6],n:[0,1,0],k:1.1}];
+    const sy=Math.sin(this.yaw),cy=Math.cos(this.yaw),sp=Math.sin(this.pitch),cp=Math.cos(this.pitch);
+    if(s.rz){faces.sort((a,b)=>a.k-b.k);for(const f of faces)this.polygon(ctx,f.idx.map(i=>v[i]),hex(shade(col,f.k)));}
+    else for(const f of faces){let nx=f.n[0],nz=f.n[2],ry=s.ry||0;let a=nx*Math.cos(ry)+nz*Math.sin(ry),b=-nx*Math.sin(ry)+nz*Math.cos(ry);if(a*sy*cp+f.n[1]*sp+b*cy*cp>.001)this.polygon(ctx,f.idx.map(i=>v[i]),hex(shade(col,f.k)));}
+  }
+  drawCanvas(){
+    const ctx=this.ctx;ctx.setTransform(this.ratio,0,0,this.ratio,0,0);ctx.fillStyle='#d5e3de';ctx.fillRect(0,0,this.W,this.H);
+    const all=[...this.terrain,...this.shapes],base=all.filter(s=>s.base),rest=all.filter(s=>!s.base);
+    // Ground and infrastructure first, then a soft, consistent afternoon shadow layer.
+    for(const s of base)this.drawShape(s,ctx);
+    ctx.fillStyle='rgba(48,78,57,.12)';
+    for(const s of rest){if(s.owner<0||s.detail||s.y<1||s.h<1.4||s.kind==='pyramid'||s.kind==='cylinder')continue;const x=s.x,z=s.z,w=s.w/2,d=s.d/2,h=s.y+s.h/2;const v=[[x-w,.13,z-d],[x+w,.13,z-d],[x+w,.13,z+d],[x+w-h*.43,.13,z+d-h*.27],[x-w-h*.43,.13,z-d-h*.27]].map(p=>this.project(...p));this.polygon(ctx,v,'#476e58',.115);}
+    rest.push(...this.dynamicShapes());const sy=Math.sin(this.yaw)*Math.cos(this.pitch),cy=Math.cos(this.yaw)*Math.cos(this.pitch),sp=Math.sin(this.pitch);
+    rest.sort((a,b)=>(a.x*sy+a.z*cy+a.y*sp)-(b.x*sy+b.z*cy+b.y*sp));
+    for(const s of rest)this.drawShape(s,ctx);
+    const ps=this.preview.length?this.preview:this.selected>=0?[{x:this.selected%N,z:(this.selected/N)|0,valid:true}]:[];
+    for(const p of ps){const x=world(p.x),z=world(p.z),verts=[[x-1.95,.35,z-1.95],[x+1.95,.35,z-1.95],[x+1.95,.35,z+1.95],[x-1.95,.35,z+1.95]].map(v=>this.project(...v));this.polygon(ctx,verts,p.valid?'#4fb494':'#df785f',.55);ctx.strokeStyle=p.valid?'#e6fff4':'#ffb5a3';ctx.lineWidth=1.5;ctx.beginPath();verts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.stroke();}
+    if(this.night){ctx.fillStyle='rgba(22,42,67,.53)';ctx.fillRect(0,0,this.W,this.H);}
+  }
+  minimap(canvas){const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,k=w/N;ctx.clearRect(0,0,w,h);ctx.fillStyle='#adc49e';ctx.fillRect(0,0,w,h);
+    for(let z=0;z<N;z++)for(let x=0;x<N;x++){const c=this.sim.at(x,z);let color=this.sim.water(x,z)?0x7bb7b8:null;if(c.type!=='empty')color=colors[c.type]||0xffffff;if(color!==null){ctx.fillStyle=hex(color);ctx.fillRect(x*k,z*k,k+.1,k+.1);}}
+    const p=this.target,px=(p.x/CELL+N/2)*k,py=(p.z/CELL+N/2)*k;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(px,py,16/this.zoom,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fill();
+  }
+}
+root.HC.CityView=CityView;
+})(window);
+</script><script>(function(){
+'use strict';
+const {CitySim,CityView,N,CELL,COST,world,clamp,ZONES,line,milestones}=HC;
+const $=id=>document.getElementById(id),$$=s=>[...document.querySelectorAll(s)];
+const PATHS={
+ skyline:'M3 21V10h5v11M8 21V3h7v18M15 21V7h6v14M2 21h20M11 7h1M11 11h1M11 15h1M18 11h1M18 15h1',
+ wallet:'M4 5h14a2 2 0 0 1 2 2v12H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h13v2M20 10h-5v5h5M16 12.5h.1',
+ people:'M15 21v-3a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v3M16 4a4 4 0 0 1 0 8M21 21v-3a4 4 0 0 0-3-3.8',
+ smile:'M8 14s1.5 3 4 3 4-3 4-3M8 9h.01M16 9h.01',
+ sun:'M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4',
+ moon:'M21 12.8A9 9 0 0 1 11.2 3 9 9 0 1 0 21 12.8Z',
+ save:'M5 3h12l4 4v14H3V3h2M7 3v6h10V3M7 21v-8h10v8M14 5v2',
+ camera:'M14 4h-4L8 7H3v13h18V7h-5Z',
+ help:'M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4M12 17h.01',
+ settings:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1Z',
+ flag:'M5 22V3M5 3c4-3 8 3 14 0v10c-6 3-10-3-14 0',
+ gift:'M3 8h18v4H3ZM5 12v9h14v-9M12 8v13M12 8H8a3 3 0 1 1 3-3l1 3ZM12 8h4a3 3 0 1 0-3-3l-1 3Z',
+ leaf:'M20 3C8 2 2 8 5 16c8 6 16-1 15-13ZM4 21l11-11',
+ bolt:'M13 2 4 14h7l-1 8 10-13h-8Z',
+ drop:'M12 2S4 11 4 15a8 8 0 0 0 16 0c0-4-8-13-8-13ZM8 15a4 4 0 0 0 4 4',
+ traffic:'M6 3h12v18H6ZM10 7h4M10 12h4M10 17h4M3 7h3M18 7h3M3 17h3M18 17h3',
+ north:'m12 3 7 17-7-4-7 4Z',
+ layers:'m12 3 10 5-10 5L2 8ZM2 12l10 5 10-5M2 16l10 5 10-5',
+ zoning:'M3 3h7v7H3ZM14 3h7v7h-7ZM3 14h7v7H3ZM14 14h7v7h-7Z',
+ compass:'m16 8-3 5-5 3 3-5Z',
+ plus:'M12 5v14M5 12h14',minus:'M5 12h14',
+ grid:'M3 3h18v18H3ZM9 3v18M15 3v18M3 9h18M3 15h18',
+ cursor:'m4 3 7 18 2-7 7-2ZM13 14l6 6',
+ road:'M7 2 3 22M17 2l4 20M12 3v3M12 10v4M12 18v3',
+ home:'m2 11 10-8 10 8M5 10v11h14V10M10 21v-7h4v7',
+ shop:'M3 9 5 3h14l2 6M3 9v2a3 3 0 0 0 4 2 3 3 0 0 0 5 0 3 3 0 0 0 5 0 3 3 0 0 0 4-2V9ZM5 14v7h14v-7M9 21v-5h6v5M8 3 7 9M16 3l1 6',
+ factory:'M3 21V10l6 3V8l6 4V3h4l2 18ZM6 17h2M11 17h2M16 17h2',
+ tree:'M12 2 5 10h3l-5 7h7v5h4v-5h7l-5-7h3Z',
+ services:'M2 21h20M4 21V8h7v13M11 21V3h9v18M14 7h3M14 11h3M14 15h3M7 11v2M7 16v2',
+ bulldoze:'M3 14h12v5H3ZM15 14V7h4l3 12h-7M4 14V9h7l3 5M5 9V6h5v3M3 21h13M19 21h3',
+ calendar:'M5 5h14a2 2 0 0 1 2 2v14H3V7a2 2 0 0 1 2-2ZM7 2v6M17 2v6M3 11h18M7 15h2M13 15h2M7 18h2',
+ pause:'M8 5v14M16 5v14',check:'m5 12 4 4L19 6',
+ wind:'M3 8h12a3 3 0 1 0-3-3M2 12h17a3 3 0 1 1-3 3M4 16h5a3 3 0 1 1-3 3',
+ flame:'M12 2c2 7 7 7 7 13a7 7 0 0 1-14 0c0-3 2-6 4-8 0 5 3 5 3-5ZM12 14c2 2 3 4 1 6-3 1-5-2-1-6Z',
+ medical:'M9 3h6v6h6v6h-6v6H9v-6H3V9h6Z',
+ close:'m6 6 12 12M18 6 6 18',download:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',
+ upload:'M12 16V4m-5 5 5-5 5 5M4 16v5h16v-5',
+ reset:'M3 10a9 9 0 1 1 1 8M3 3v7h7',chart:'M4 3v17h17M7 14l4-5 4 3 5-7',
+ mouse:'M8 3h8a3 3 0 0 1 3 3v10a7 7 0 0 1-14 0V6a3 3 0 0 1 3-3ZM12 3v6',
+ keyboard:'M2 6h20v14H2ZM5 10h1M9 10h1M13 10h1M17 10h1M5 14h1M9 14h1M13 14h1M17 14h1M7 17h10',
+ arrow:'M5 12h14m-5-5 5 5-5 5',spark:'m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z'
+};
+function icon(name){let p=PATHS[name]||PATHS.home;let circles=name==='people'?'<circle cx="9" cy="7" r="4"/>':name==='smile'||name==='help'||name==='compass'?'<circle cx="12" cy="12" r="10"/>':name==='sun'?'<circle cx="12" cy="12" r="4"/>':name==='camera'?'<circle cx="12" cy="13" r="4"/>':'';return `<svg viewBox="0 0 24 24" aria-hidden="true">${circles}<path d="${p}"/></svg>`;}
+function icons(scope=document){scope.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));}
+icons();
+const LABELS={empty:'Open land',road:'Two-lane road',residential:'Residential',commercial:'Commercial',industrial:'Industrial',park:'Neighborhood park',power:'Wind turbine',water:'Water tower',fire:'Fire station',hospital:'Medical center'};
+const INFO={road:['road','Two-lane road','Drag to draw. Water crossings become bridges.'],residential:['home','Residential zoning','Zone near connected roads. Families move in over time.'],commercial:['shop','Commercial zoning','Create jobs and a favorite shop on every corner.'],industrial:['factory','Industrial zoning','Make room for production and much-needed jobs.'],park:['tree','Neighborhood park','Happier residents. Better homes. A little breathing room.'],power:['wind','Wind turbine','1,050 power capacity. Distributes through connected roads.'],water:['drop','Water tower','3,300 water capacity. Connect to the regional road network.'],fire:['flame','Fire station','Road-connected fire services improve citywide happiness.'],hospital:['medical','Medical center','Connected healthcare improves citywide happiness.'],bulldoze:['bulldoze','Make room for something new','Drag to remove. Undo with Ctrl+Z.']};
+const STORE='harbor-city.save.v1';let sim,loaded=false;
+try{const saved=localStorage.getItem(STORE);if(saved){sim=CitySim.deserialize(saved);loaded=true;}}catch(e){console.info('Harbor City: a fresh city was opened because no compatible local save was available.');}
+if(!sim)sim=new CitySim();
+const view=new CityView($('world'),sim);
+let tool='inspect',service='power',dense=false,brush=1,speed=1,previousSpeed=1,accumulator=0,lastFrame=performance.now(),lastUI=0,lastSave=performance.now(),saveDirty=false,modalKind='',photo=false,selected=-1,previousFocus=null,previousPopulation=sim.stats.population;
+const fmt=n=>Math.round(n).toLocaleString('en-US');const money=n=>(n<0?'−$':'$')+fmt(Math.abs(n));
+function actualTool(){return tool==='services'?service:tool;}
+function toast(title,text='',error=false){const el=document.createElement('div');el.className='toast'+(error?' error':'');const mark=document.createElement('span');mark.innerHTML=icon(error?'help':'check');const content=document.createElement('div');const strong=document.createElement('strong');strong.textContent=title;content.append(strong);if(text){const sub=document.createElement('small');sub.textContent=text;content.append(sub);}el.append(mark,content);$('toasts').append(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .25s';setTimeout(()=>el.remove(),260);},text?5600:3300);while($('toasts').children.length>3)$('toasts').firstChild.remove();}
+function setTool(next){tool=next;view.setPreview([],actualTool(),dense);$$('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===next));$('world').classList.toggle('building',next!=='inspect');$('build-info').classList.toggle('visible',next!=='inspect');$('zone-options').classList.toggle('visible',next==='residential'||next==='commercial');$('service-options').classList.toggle('visible',next==='services');$('welcome-pill').classList.add('hidden');if(next!=='inspect'){selected=-1;view.select(-1);$('inspector').classList.remove('visible');}updateBuildInfo();}
+function updateBuildInfo(points=[]){const t=actualTool();if(t==='inspect')return;const [ic,title,desc]=INFO[t];$('build-icon').innerHTML=icon(ic);$('build-title').textContent=(dense&&['residential','commercial'].includes(t)?'High-density ':t==='residential'?'Low-density ':'')+(dense&&['residential','commercial'].includes(t)?t+' zoning':title);$('build-description').textContent=desc;
+  let cost=COST[t],count=0;for(const p of points){const q=sim.quote(p.x,p.z,t,dense);if(q.ok){if(!count)cost=0;cost+=q.cost;count++;}}
+  $('build-price').innerHTML=money(cost)+`<small>${count>1?count+' tiles':t==='road'?'per tile · bridges $320':ZONES.includes(t)||t==='bulldoze'?'per tile':'construction cost'}</small>`;
+  $('build-price').classList.toggle('bad-number',cost>sim.money);
+}
+$$('[data-tool]').forEach(b=>b.addEventListener('click',()=>setTool(b.dataset.tool)));
+$$('[data-service]').forEach(b=>b.addEventListener('click',()=>{service=b.dataset.service;$$('[data-service]').forEach(x=>x.classList.toggle('active',x===b));updateBuildInfo();}));
+$$('[data-density]').forEach(b=>b.addEventListener('click',()=>{dense=b.dataset.density==='high';$$('[data-density]').forEach(x=>x.classList.toggle('active',x===b));updateBuildInfo();}));
+$$('[data-brush]').forEach(b=>b.addEventListener('click',()=>{brush=Number(b.dataset.brush);$$('[data-brush]').forEach(x=>x.classList.toggle('active',x===b));}));
+function setSpeed(v){speed=v;if(v)previousSpeed=v;$$('[data-speed]').forEach(b=>b.classList.toggle('active',Number(b.dataset.speed)===v));}
+$$('[data-speed]').forEach(b=>b.addEventListener('click',()=>setSpeed(Number(b.dataset.speed))));
+function togglePause(){setSpeed(speed?0:previousSpeed);}
+$$('[data-layer]').forEach(b=>b.addEventListener('click',()=>{view.setLayer(b.dataset.layer);$$('[data-layer]').forEach(x=>x.classList.toggle('active',x===b));$('layer-name').textContent={none:'Overview',zoning:'Land use',traffic:'Estimated traffic flow',services:'Road + utility access'}[b.dataset.layer];}));
+function toggleGrid(){view.setGrid(!view.grid);$('grid-btn').classList.toggle('active',view.grid);}
+function toggleNight(){view.setNight(!view.night);$('night-btn').classList.toggle('active',view.night);$('night-btn').innerHTML=icon(view.night?'sun':'moon');$('weather-icon').innerHTML=icon(view.night?'moon':'sun');$('temperature').textContent=view.night?'12°':'18°';$('weather-label').textContent=view.night?'A city after dark':'A little room to grow';}
+$('night-btn').onclick=toggleNight;$('grid-btn').onclick=toggleGrid;$('home-btn').onclick=()=>view.home();$('zoom-in').onclick=()=>view.zoomBy(.2);$('zoom-out').onclick=()=>view.zoomBy(-.2);
+$('minimap').addEventListener('pointerdown',e=>{const r=e.currentTarget.getBoundingClientRect();view.focus(((e.clientX-r.left)/r.width-.5)*N*CELL,((e.clientY-r.top)/r.height-.5)*N*CELL);});
+function updateUI(){
+ const s=sim.stats;$('money').textContent=money(sim.money);$('income').textContent=(s.net>=0?'+':'−')+money(Math.abs(s.net))+' / week';$('income').className=s.net>=0?'positive':'bad-number';$('money').classList.toggle('bad-number',sim.money<0);
+ $('population').textContent=fmt(s.population);const delta=s.population-previousPopulation;$('population-delta').textContent=delta>0?'+'+fmt(delta)+' since you arrived':'Residents & counting';$('happiness').innerHTML=s.happiness+'<span style="font-size:12px">%</span>';$('happiness-label').textContent=s.happiness>80?'Feeling at home':s.happiness>60?'Settling in':'Needs some attention';
+ const goal=milestones.find(m=>!sim.claimed.includes(m.pop))||milestones[milestones.length-1];$('goal-progress').style.width=clamp(s.population/goal.pop*100,0,100)+'%';$('goal-current').textContent=fmt(s.population)+' residents';$('goal-target').textContent=fmt(goal.pop);$('goal-description').textContent='A thriving city starts with a place to call home. Reach '+fmt(goal.pop)+' residents.';$('goal-reward').textContent=money(goal.reward)+' development grant';
+ const current=[...milestones].reverse().find(m=>sim.claimed.includes(m.pop));$('city-tier').textContent=current?.name||'A fresh beginning';$('goal-title').textContent=s.population>=20000?'Made of possibility.':'Room to grow.';
+ for(const [k,v]of [['power',s.power*100],['water',s.water*100],['traffic',s.traffic]]){$(k+'-label').textContent=Math.round(v)+'%';$(k+'-label').classList.toggle('bad-number',v<65);$(k+'-meter').style.width=v+'%';$(k+'-meter').style.background=v<65?'#bd9476':'#95ad82';}
+ $('power-label').parentElement.title=`Capacity: ${fmt(s.powerCapacity)} / Usage: ${fmt(s.powerNeed)}. Road-connected utilities are distributed citywide.`;
+ $('water-label').parentElement.title=`Capacity: ${fmt(s.waterCapacity)} / Usage: ${fmt(s.waterNeed)}.`;$('traffic-label').parentElement.title='Estimated traffic flow based on road capacity and population. Cars follow the connected street network.';
+ for(const [short,type]of [['r','residential'],['c','commercial'],['i','industrial']]){$('demand-'+short).textContent=s.demand[type];$('demand-'+short+'-bar').style.height=s.demand[type]+'%';}
+ const date=new Date(Date.UTC(2001,0,1)+sim.day*86400000);$('date-label').textContent=date.toLocaleDateString('en-US',{month:'short',day:'2-digit',timeZone:'UTC'}).toUpperCase()+', YEAR '+(Math.floor(sim.day/365)+1);
+ $('brand-name').textContent=sim.name.toUpperCase();view.minimap($('minimap'));if(selected>=0)updateInspector();if(modalKind==='budget')updateBudget();
+}
+function updateLabels(){for(const el of $$('.district')){const p=view.project(Number(el.dataset.x),Number(el.dataset.y),Number(el.dataset.z));el.style.left=p.x+'px';el.style.top=p.y+'px';const coversLeft=innerWidth>650&&p.x<250&&p.y<600,coversRight=p.x>innerWidth-210&&p.y<420;el.style.opacity=(p.y<115||p.y>innerHeight-165||coversLeft||coversRight||view.zoom>2.4)?0:.85;}}
+function inspect(x,z){if(!sim.inBounds(x,z))return;selected=z*N+x;view.select(selected);$('inspector').classList.add('visible');$('welcome-pill').classList.add('hidden');updateInspector();}
+function updateInspector(){if(selected<0)return;const c=sim.cells[selected],s=sim.stats;const title=c.type==='residential'?(c.dense?'Riverside apartments':'Cedar family home'):c.type==='commercial'?(c.dense?'Willow business center':'Neighborhood storefront'):LABELS[c.type];$('inspect-title').textContent=title;$('inspect-eyebrow').textContent=c.type==='empty'?'A NEW POSSIBILITY':c.level&&ZONES.includes(c.type)?'LEVEL '+c.level+' · '+(c.dense?'HIGH DENSITY':'LOW DENSITY'):'CITY INFRASTRUCTURE';
+ let html='';const row=(a,b)=>`<div class="inspection-row"><span>${a}</span><b>${b}</b></div>`;
+ if(ZONES.includes(c.type)){html+=row('Zoning',LABELS[c.type]);if(c.level){html+=row(c.type==='residential'?'Residents':'Jobs',fmt(Math.floor(sim.capacity(c)*c.occ))+' / '+sim.capacity(c));html+=row('Occupancy',Math.round(c.occ*100)+'%');}else html+='<p>Construction will begin when demand, road access, electricity and water are available.</p>';
+  const ready=!!sim.access[selected]&&s.power>.35&&s.water>.35;html+=`<div class="status-badge${ready?'':' bad'}">${ready?'✓ Connected & supplied':'! '+(!sim.access[selected]?'Needs a connected road':s.power<.35?'Needs electricity':'Needs water')}</div>`;
+ }else if(c.type==='road'){html+=row('Surface',sim.water(selected%N,(selected/N)|0)?'Bridge':'Asphalt');html+=row('Regional access',sim.connected[selected]?'Connected':'Disconnected');html+='<p>Zones grow within two tiles of a street connected to the western regional entrance.</p>';}
+ else if(c.type==='empty'){html+='<p>'+ (sim.water(selected%N,(selected/N)|0)?'Willow River. Build a road across the water to create a bridge.':'Room for a new story. Build a road, then zone homes, shops, or industry nearby.')+'</p>';}
+ else {html+=row('Weekly upkeep',money(HC.UPKEEP[c.type]));html+=row('Regional access',sim.access[selected]?'Connected':'Disconnected');if(c.type==='power')html+=row('Power capacity','1,050');if(c.type==='water')html+=row('Water capacity','3,300');html+='<p>'+INFO[c.type][2]+'</p>';}
+ $('inspect-content').innerHTML=html;$('inspect-demolish').style.display=c.type==='empty'?'none':'flex';
+}
+$('close-inspector').onclick=()=>{selected=-1;view.select(-1);$('inspector').classList.remove('visible');};
+$('inspect-demolish').onclick=()=>{if(selected>=0){const p={x:selected%N,z:(selected/N)|0};commit([p],'bulldoze');updateInspector();}};
+function commit(points,override){const t=override||actualTool();const result=sim.build(points,t,dense);if(result.ok){view.rebuild(sim);saveDirty=true;updateUI();toast(t==='bulldoze'?'A fresh start.':ZONES.includes(t)?result.count+' '+t+' '+(result.count===1?'lot':'lots')+' zoned.':result.count+' '+(t==='road'?'road '+(result.count===1?'tile':'tiles'):LABELS[t].toLowerCase()+(result.count>1?'s':''))+' built.',money(result.cost)+' construction cost');if(ZONES.includes(t)&&points.every(p=>!sim.access[sim.index(p.x,p.z)]))toast('This neighborhood needs a road.','Zones must be within two tiles of a region-connected street.');}else if(result.reason!=='Already built'&&result.reason!=='Nothing to remove')toast(result.reason,'',true);view.setPreview([],t,dense);}
+function undo(){if(sim.undo()){view.rebuild(sim);saveDirty=true;updateUI();toast('Last construction undone.');}else toast('There is nothing to undo.');}
+function pointsFor(a,b){const t=actualTool();if(t==='road')return line(a,b);if(['park','power','water','fire','hospital'].includes(t))return[b];const points=[];const size=ZONES.includes(t)?brush:1;for(let z=Math.min(a.z,b.z);z<=Math.max(a.z,b.z)+size-1;z++)for(let x=Math.min(a.x,b.x);x<=Math.max(a.x,b.x)+size-1;x++)if(sim.inBounds(x,z))points.push({x,z});return points;}
+const host=$('world');let pointer=null,hoverCell='',touches=new Map(),pinch=null,ignoreUntilUp=false;
+host.addEventListener('contextmenu',e=>e.preventDefault());
+host.addEventListener('pointerdown',e=>{
+ if(modalKind)return;host.setPointerCapture(e.pointerId);touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(touches.size===2){const a=[...touches.values()];pinch={dist:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2};pointer=null;ignoreUntilUp=true;view.setPreview([],actualTool(),dense);return;}
+ if(ignoreUntilUp)return;const cell=view.pick(e.clientX,e.clientY);pointer={id:e.pointerId,x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,cell,lastCell:cell,mode:e.button===2?'orbit':e.button===1||tool==='inspect'?'pan':'build',moved:false};if(pointer.mode==='build'){let points=pointsFor(cell,cell);view.setPreview(points,actualTool(),dense);updateBuildInfo(points);}host.classList.add('dragging');
+});
+host.addEventListener('pointermove',e=>{
+ if(touches.has(e.pointerId))touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pinch&&touches.size>=2){const a=[...touches.values()],dist=Math.max(10,Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)),x=(a[0].x+a[1].x)/2,y=(a[0].y+a[1].y)/2;view.zoomBy(Math.log(dist/Math.max(10,pinch.dist)));view.pan(x-pinch.x,y-pinch.y);pinch={dist,x,y};return;}
+ const cell=view.pick(e.clientX,e.clientY);
+ if(pointer&&e.pointerId===pointer.id){const dx=e.clientX-pointer.lastX,dy=e.clientY-pointer.lastY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>4)pointer.moved=true;
+   if(pointer.mode==='orbit')view.orbit(dx,dy);else if(pointer.mode==='pan'&&pointer.moved)view.pan(dx,dy);else if(pointer.mode==='build'&&(cell.x!==pointer.lastCell.x||cell.z!==pointer.lastCell.z)){const pts=pointsFor(pointer.cell,cell);view.setPreview(pts,actualTool(),dense);updateBuildInfo(pts);}pointer.lastX=e.clientX;pointer.lastY=e.clientY;pointer.lastCell=cell;
+ }else if(tool!=='inspect'&&!ignoreUntilUp){const key=cell.x+','+cell.z;if(key!==hoverCell){hoverCell=key;const pts=pointsFor(cell,cell).filter(p=>sim.inBounds(p.x,p.z));view.setPreview(pts,actualTool(),dense);updateBuildInfo(pts);}}
+});
+function pointerUp(e,cancel=false){touches.delete(e.pointerId);if(!touches.size){pinch=null;ignoreUntilUp=false;}if(pointer&&e.pointerId===pointer.id){const p=pointer;pointer=null;if(!cancel){if(p.mode==='build')commit(pointsFor(p.cell,p.lastCell));else if(p.mode==='pan'&&!p.moved&&tool==='inspect'&&e.button===0){const c=view.pick(e.clientX,e.clientY,true);inspect(c.x,c.z);}}}host.classList.remove('dragging');if(host.hasPointerCapture(e.pointerId))host.releasePointerCapture(e.pointerId);}
+host.addEventListener('pointerup',e=>pointerUp(e));host.addEventListener('pointercancel',e=>pointerUp(e,true));host.addEventListener('lostpointercapture',()=>{if(!touches.size)pointer=null;});host.addEventListener('pointerleave',()=>{if(!pointer)view.setPreview([],actualTool(),dense);hoverCell='';});
+host.addEventListener('wheel',e=>{e.preventDefault();view.zoomBy(-e.deltaY*.001);},{passive:false});
+window.addEventListener('resize',()=>{view.resize();updateLabels();});
+function save(silent=false){try{localStorage.setItem(STORE,sim.serialize());saveDirty=false;$('saved-label').textContent='Saved just now';if(!silent)toast('Your city is saved.','Stored in this browser. Export a file for a portable backup.');return true;}catch(e){$('saved-label').textContent='Export to keep your city';if(!silent)toast('Browser storage is unavailable.','Use Settings → Export save to keep a copy.',true);return false;}}
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
+function exportSave(){downloadBlob(new Blob([sim.serialize()],{type:'application/json'}),'harbor-city-save.json');toast('City exported.');}
+$('save-btn').onclick=()=>save();
+function setPhoto(on){photo=on;document.body.classList.toggle('photo',on);$('photo-btn').classList.toggle('active',on);if(on){setTool('inspect');view.setPreview([],actualTool(),dense);view.select(-1);}}
+$('photo-btn').onclick=()=>setPhoto(!photo);$('exit-photo').onclick=()=>setPhoto(false);
+$('download-photo').onclick=()=>{try{if(view.mode==='three')view.renderer.render(view.scene,view.camera);else view.drawCanvas();const canvas=view.mode==='three'?view.renderer.domElement:view.canvas;canvas.toBlob(blob=>{if(blob)downloadBlob(blob,'harbor-city.png');else toast('Could not capture this image.','',true);},'image/png');}catch(e){toast('The image could not be saved.','Use your device’s screenshot controls.',true);}};
+function openModal(kind){previousFocus=document.activeElement;modalKind=kind;$('modal-shade').classList.add('open');$('modal-eyebrow').textContent='HARBOR CITY';let html='';
+ if(kind==='help'){
+  $('modal-title').textContent='Make yourself at home.';
+  html=`<p class="lead">Your riverfront town is already alive. Draw a few streets, give people somewhere to live and work, and watch the next neighborhood take shape.</p><div class="help-grid"><div class="help-card">${icon('road')}<h4>1. Connect the city</h4><p>Choose Roads and drag an L-shaped route. Join the existing street network. Crossing water automatically creates a bridge at $320 per tile.</p></div><div class="help-card">${icon('home')}<h4>2. Give it a purpose</h4><p>Drag to zone homes, shops, or industry within two tiles of a connected road. High-density zoning grows taller buildings. Demand drives construction.</p></div><div class="help-card">${icon('services')}<h4>3. Keep it working</h4><p>Wind turbines and water towers supply the connected network. Parks, fire stations, and clinics improve happiness. Utilities do not need separate pipes or cables.</p></div><div class="help-card">${icon('chart')}<h4>4. Find the balance</h4><p>Balance jobs with housing. Watch power, water, and your budget. Click the treasury to adjust taxes. Each simulation day takes two seconds at 1×.</p></div></div><div class="keyboard-table"><div><span>Pan the camera</span><kbd>Drag / WASD</kbd></div><div><span>Orbit the city</span><kbd>Right drag / Q E</kbd></div><div><span>Zoom</span><kbd>Scroll / pinch</kbd></div><div><span>Pause / resume</span><kbd>Space</kbd></div><div><span>Build tools</span><kbd>1–9 / B</kbd></div><div><span>Inspect / cancel</span><kbd>Esc</kbd></div><div><span>Undo construction</span><kbd>Ctrl Z</kbd></div><div><span>Save</span><kbd>Ctrl S</kbd></div><div><span>Grid / day-night</span><kbd>G / V</kbd></div><div><span>Photo / reset camera</span><kbd>P / H</kbd></div></div><p class="settings-note">A compact city-building sandbox, not a full commercial-game recreation. Road routing, demand, taxes, utility capacity, and growth are simulated; detailed pipes, fire incidents, and individual citizen schedules are not. The simulation pauses while a dialog is open. Touch: one finger builds or pans; two fingers pan and zoom.</p><div class="modal-actions"><button class="btn primary" id="help-done">Let's build ${icon('arrow')}</button></div>`;
+ }else if(kind==='budget'){
+  $('modal-title').textContent='A little financial planning.';$('modal-eyebrow').textContent='THE CITY BUDGET';
+  html=`<div class="budget-summary"><div><small>WEEKLY REVENUE</small><strong id="budget-revenue"></strong></div><div><small>WEEKLY EXPENSES</small><strong id="budget-expenses"></strong></div><div><small>NET BALANCE</small><strong id="budget-net"></strong></div></div><div class="eyebrow" style="margin:18px 0 8px">POPULATION · RECENT HISTORY</div><div class="budget-chart" id="budget-chart"></div><div class="tax-row"><strong>Citywide tax rate</strong><span id="tax-value">${sim.tax}%</span></div><input type="range" id="tax-slider" min="5" max="18" step="1" value="${sim.tax}" aria-label="City tax rate"><div class="range-labels"><span>5% · More room to grow</span><span>18% · More revenue</span></div><p class="budget-note">High taxes earn more per resident, but reduce happiness and residential demand. Infrastructure and services have weekly upkeep. Income and expenses accrue daily. A negative treasury reduces utility performance and stops new construction.</p><div class="modal-actions"><button class="btn primary" id="budget-done">Back to the city ${icon('arrow')}</button></div>`;
+ }else if(kind==='settings'){
+  $('modal-title').textContent='A place to call your own.';
+  html=`<label class="settings-label" for="city-name-input">CITY NAME</label><input class="name-input" id="city-name-input" maxlength="32" autocomplete="off"><div class="settings-grid"><button class="btn" id="settings-save">${icon('save')}Save in browser</button><button class="btn" id="settings-export">${icon('download')}Export save</button><button class="btn" id="settings-import">${icon('upload')}Import save</button><button class="btn danger" id="settings-new">${icon('reset')}New city</button></div><p class="settings-note">Autosaves stay in this browser, on this device. Export your city to a JSON file for a portable backup, especially when opening the standalone HTML file. Three.js is loaded from a pinned CDN version; an offline canvas renderer keeps the same simulation playable without a connection.</p><div class="modal-actions"><button class="btn primary" id="settings-done">Make it home ${icon('check')}</button></div>`;
+ }else if(kind==='new'){
+  $('modal-title').textContent='A fresh beginning.';
+  html=`<p class="lead">Start with a clean slate and $84,260, or bring back the original riverfront town. Your current city will be replaced. Export a save first to keep it.</p><div class="settings-grid"><button class="btn" id="new-export">${icon('download')}Export current city</button><button class="btn" id="new-cancel">Keep building</button></div><div class="modal-actions"><button class="btn" id="new-starter">Restore starter city</button><button class="btn primary" id="new-empty">Start from scratch ${icon('arrow')}</button></div>`;
+ }
+ $('modal-content').innerHTML=html;
+ if(kind==='help')$('help-done').onclick=closeModal;
+ if(kind==='budget'){$('budget-done').onclick=closeModal;$('tax-slider').oninput=e=>{sim.tax=Number(e.target.value);sim.recalculate();saveDirty=true;updateUI();};updateBudget();}
+ if(kind==='settings'){$('city-name-input').value=sim.name;$('settings-save').onclick=()=>{applyName();save();};$('settings-export').onclick=()=>{applyName();exportSave();};$('settings-import').onclick=()=>$('import-file').click();$('settings-new').onclick=()=>openModal('new');$('settings-done').onclick=()=>{applyName();save(true);closeModal();};}
+ if(kind==='new'){$('new-export').onclick=exportSave;$('new-cancel').onclick=closeModal;$('new-starter').onclick=()=>newCity(true);$('new-empty').onclick=()=>newCity(false);}
+ $('modal-close').focus();
+}
+function applyName(){const name=$('city-name-input')?.value.trim();if(name){sim.name=name.slice(0,32);saveDirty=true;updateUI();}}
+function closeModal(){modalKind='';$('modal-shade').classList.remove('open');if(previousFocus instanceof HTMLElement)previousFocus.focus();lastFrame=performance.now();}
+function updateBudget(){if(!$('budget-revenue'))return;const s=sim.stats;$('budget-revenue').textContent=money(s.income);$('budget-expenses').textContent=money(s.expenses);$('budget-net').textContent=(s.net>=0?'+':'−')+money(Math.abs(s.net));$('budget-net').classList.toggle('bad-number',s.net<0);$('tax-value').textContent=sim.tax+'%';const a=sim.history.map(h=>h.pop);if(!a.length)a.push(s.population);const max=Math.max(...a,1),min=Math.min(...a)*.85;const pts=a.map((n,i)=>`${(i/Math.max(1,a.length-1)*500).toFixed(2)},${(94-(n-min)/Math.max(1,max-min)*78).toFixed(2)}`).join(' ');$('budget-chart').innerHTML=`<svg viewBox="0 0 500 105" preserveAspectRatio="none" aria-label="Population history"><defs><linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#8ead7c" stop-opacity=".35"/><stop offset="100%" stop-color="#8ead7c" stop-opacity=".02"/></linearGradient></defs><polygon points="0,105 ${pts} 500,105" fill="url(#chart-fill)"/><polyline points="${pts}" fill="none" stroke="#79976a" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>`;}
+$('modal-close').onclick=closeModal;$('modal-shade').addEventListener('pointerdown',e=>{if(e.target===$('modal-shade'))closeModal();});$('help-btn').onclick=()=>openModal('help');$('settings-btn').onclick=()=>openModal('settings');$('budget-btn').onclick=()=>openModal('budget');$('renderer-status').onclick=()=>openModal('help');
+function newCity(starter){sim=new CitySim(starter);if(!starter){for(let x=0;x<=4;x++)sim.at(x,16).type='road';sim.recalculate();}replaceCity();if(!starter)view.focus(-65,world(16));closeModal();toast(starter?'Welcome back to the riverfront.':'The next great city starts with you.','Connect a road, add power and water, then zone your first homes.');save(true);}
+function replaceCity(){selected=-1;view.select(-1);$('inspector').classList.remove('visible');previousPopulation=sim.stats.population;view.cars=[];view.rebuild(sim);view.home();accumulator=0;setTool('inspect');setSpeed(1);saveDirty=true;updateUI();}
+$('import-file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>2000000)throw Error('Please choose a Harbor City save smaller than 2 MB.');const candidate=CitySim.deserialize(await file.text());sim=candidate;replaceCity();closeModal();save(true);toast('Your city is home.','Save imported successfully.');}catch(err){toast('Could not import this save.',err.message,true);}finally{e.target.value='';}});
+window.addEventListener('keydown',e=>{
+ const editable=['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName);
+ if(modalKind){if(e.key==='Escape'){e.preventDefault();closeModal();}if(e.key==='Tab'){const nodes=$('modal-shade').querySelectorAll('button:not([disabled]),input');const first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}return;}
+ if(editable)return;
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();save();return;}
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();return;}
+ if(e.ctrlKey||e.metaKey||e.altKey)return;
+ const key=e.key.toLowerCase();if(key===' '){e.preventDefault();if(!e.repeat)togglePause();return;}
+ if(key==='escape'){e.preventDefault();if(photo)setPhoto(false);else{setTool('inspect');selected=-1;view.select(-1);$('inspector').classList.remove('visible');}return;}
+ if(key==='?'){openModal('help');return;}
+ if('12345'.includes(key)&&key.length===1){setTool({1:'road',2:'residential',3:'commercial',4:'industrial',5:'park'}[key]);return;}
+ if('6789'.includes(key)&&key.length===1){service={6:'power',7:'water',8:'fire',9:'hospital'}[key];setTool('services');$$('[data-service]').forEach(b=>b.classList.toggle('active',b.dataset.service===service));return;}
+ if(key==='b'||key==='0'){setTool('bulldoze');return;}
+ if(key==='g'){toggleGrid();return;}if(key==='v'){toggleNight();return;}if(key==='p'){setPhoto(!photo);return;}if(key==='h'){view.home();return;}
+ if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(key)){e.preventDefault();view.pan(key==='a'||key==='arrowleft'?24:key==='d'||key==='arrowright'?-24:0,key==='w'||key==='arrowup'?24:key==='s'||key==='arrowdown'?-24:0);}
+ if(key==='q')view.orbit(12,0);if(key==='e')view.orbit(-12,0);if(key==='+'||key==='=')view.zoomBy(.08);if(key==='-')view.zoomBy(-.08);
+});
+document.addEventListener('rendererready',e=>{$('renderer-status').textContent=e.detail.toUpperCase();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(saveDirty)save(true);}lastFrame=performance.now();});window.addEventListener('beforeunload',()=>{if(saveDirty)save(true);});
+let lastRevision=sim.revision;
+function frame(now){
+ const dt=Math.min(.25,(now-lastFrame)/1000);lastFrame=now;
+ if(!document.hidden){if(!modalKind){accumulator+=dt*speed;let limit=0;while(accumulator>=2&&limit++<4){accumulator-=2;sim.tick();saveDirty=true;if(sim.revision!==lastRevision){lastRevision=sim.revision;view.rebuild(sim);}while(sim.events.length){const e=sim.events.shift();toast(e.title,e.text);}}}
+  view.update(dt,modalKind?0:speed);$('day-progress').style.width=accumulator/2*100+'%';updateLabels();if(now-lastUI>550){lastUI=now;updateUI();}
+  if(now-lastSave>20000){lastSave=now;if(saveDirty)save(true);}
+ }
+ requestAnimationFrame(frame);
+}
+updateUI();updateLabels();requestAnimationFrame(frame);
+if(loaded)$('saved-label').textContent='Welcome back · city restored';
+setTimeout(()=>$('welcome-pill').classList.add('hidden'),16000);
+// Exposed for diagnostics, extension, and deterministic integration tests.
+window.HarborCity={get sim(){return sim;},view,setTool,setSpeed,commit,undo,save,openModal,closeModal,inspect,newCity,get tool(){return tool;},get speed(){return speed;}};
+})();
+</script>
+</body></html>

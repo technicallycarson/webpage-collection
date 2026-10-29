@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101216">
+<meta name="description" content="Explore four-dimensional geometry with four interactive rotation sliders. A self-contained, offline 4D space visualizer.">
+<title>Fourspace — A window into 4D</title>
+<style>
+  :root { color-scheme: dark; --bg:#101216; --panel:#15171c; --panel2:#1c1f25; --line:#2b2e35; --text:#edf0f3; --muted:#9298a3; --faint:#656d79; --warm:#f5b47c; --cool:#89b8d4; --radius:12px; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  body { -webkit-font-smoothing:antialiased; }
+  button, input, select { font:inherit; }
+  button { color:inherit; cursor:pointer; }
+  button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible { outline:2px solid var(--warm); outline-offset:5px; }
+  button { -webkit-tap-highlight-color:transparent; }
+  svg { display:block; }
+  .app { height:100dvh; min-height:680px; display:grid; grid-template-rows:78px minmax(0,1fr) 34px; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:0 30px; border-bottom:1px solid var(--line); z-index:2; background:#111318; }
+  .brand { display:flex; gap:13px; align-items:center; }
+  .brand-mark { width:36px; height:36px; color:var(--warm); }
+  .brand-name { font-size:18px; font-weight:690; letter-spacing:3px; }
+  .brand-caption { margin-top:4px; font-size:9px; letter-spacing:2.1px; color:var(--muted); text-transform:uppercase; }
+  .top-right { display:flex; align-items:center; gap:25px; }
+  .dimension-flow { display:flex; align-items:center; gap:12px; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:11px; color:var(--muted); }
+  .dimension-flow b { color:var(--warm); font-weight:500; }
+  .dimension-flow span:nth-child(even) { color:#505864; }
+  .top-help { border:1px solid var(--line); background:transparent; border-radius:8px; padding:8px 11px; display:flex; align-items:center; gap:7px; font-size:11px; color:#c9ced7; }
+  .top-help:hover { background:var(--panel2); border-color:#454952; }
+  .workspace { display:grid; grid-template-columns:minmax(0,1fr) 344px; min-height:0; }
+  .stage { position:relative; overflow:hidden; isolation:isolate; min-width:0; background:radial-gradient(ellipse at 51% 47%,#20262e 0%,#171b22 32%,#111419 73%); }
+  .stage::before { content:""; position:absolute; inset:0; background-image:radial-gradient(#9aa8ba 0.55px,transparent 0.6px); background-size:24px 24px; opacity:.13; pointer-events:none; }
+  #scene { width:100%; height:100%; display:block; position:absolute; inset:0; touch-action:none; cursor:grab; }
+  #scene.dragging { cursor:grabbing; }
+  .stage-heading { position:absolute; top:30px; left:32px; pointer-events:none; }
+  .eyebrow { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:9px; color:var(--warm); letter-spacing:2px; text-transform:uppercase; }
+  h1 { margin:11px 0 6px; font-size:34px; line-height:1.1; font-weight:560; letter-spacing:-1.1px; }
+  .shape-description { font-size:12px; color:var(--muted); max-width:330px; line-height:1.6; }
+  .stage-badges { position:absolute; top:31px; right:27px; display:flex; align-items:center; gap:9px; pointer-events:none; }
+  .projection-badge { font-size:9px; letter-spacing:.9px; color:#a8b0bd; padding:7px 9px; border:1px solid #343a4566; border-radius:5px; background:#11141955; }
+  .live-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--warm); margin-right:6px; vertical-align:1px; }
+  .stage-bottom { position:absolute; bottom:23px; left:30px; right:28px; display:flex; align-items:flex-end; justify-content:space-between; pointer-events:none; }
+  .legend { display:flex; flex-direction:column; gap:9px; }
+  .legend-label { font-size:9px; letter-spacing:1.4px; color:var(--muted); text-transform:uppercase; }
+  .legend-scale { display:flex; align-items:center; gap:9px; font:10px ui-monospace,SFMono-Regular,Consolas,monospace; color:var(--muted); }
+  .gradient { width:68px; height:3px; background:linear-gradient(90deg,var(--cool),var(--warm)); border-radius:2px; }
+  .canvas-hint { color:var(--faint); font-size:10px; margin-top:14px; display:flex; gap:14px; }
+  .axis-key { width:81px; height:71px; opacity:.95; }
+  .view-toolbar { position:absolute; bottom:31px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:4px; padding:5px; background:#1d2129e8; border:1px solid #3a404b; border-radius:11px; box-shadow:0 7px 28px #0003; backdrop-filter:blur(14px); }
+  .tool-button { height:34px; min-width:34px; padding:0 9px; display:flex; align-items:center; justify-content:center; gap:7px; border:0; border-radius:7px; color:#c6ccd5; background:transparent; font-size:11px; white-space:nowrap; }
+  .tool-button:hover { background:#353a43; color:white; }
+  .tool-button.active { color:var(--warm); background:#f5b47c13; }
+  .tool-button svg { width:16px; height:16px; }
+  .tool-divider { width:1px; height:17px; margin:0 3px; background:#3a404b; }
+  .sidebar { min-height:0; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#363b46 transparent; background:var(--panel); border-left:1px solid var(--line); padding:26px 25px 22px; }
+  .section-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .section-title { margin:0; color:#d6dbe3; font-size:10px; font-weight:600; letter-spacing:1.55px; text-transform:uppercase; }
+  .section-number { font:9px ui-monospace,SFMono-Regular,Consolas,monospace; color:var(--faint); }
+  .select-wrap { position:relative; }
+  .select-wrap > svg { position:absolute; right:13px; top:16px; width:12px; height:12px; color:var(--muted); pointer-events:none; }
+  select { appearance:none; width:100%; height:44px; border:1px solid #393d46; border-radius:9px; background:#20232a; color:var(--text); padding:0 35px 0 14px; font-size:12px; cursor:pointer; }
+  select:hover { border-color:#5b626d; }
+  .shape-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; margin-top:14px; }
+  .stat { padding-left:13px; border-left:1px solid var(--line); }
+  .stat:first-child { padding-left:0; border-left:0; }
+  .stat-value { font:17px ui-monospace,SFMono-Regular,Consolas,monospace; color:#d7dce4; }
+  .stat-label { margin-top:5px; font-size:9px; color:var(--faint); }
+  .separator { border:0; border-top:1px solid var(--line); margin:23px 0; }
+  .rotation-intro { margin:0 0 21px; font-size:11px; line-height:1.6; color:var(--muted); }
+  .rotation-control { margin:0 0 24px; }
+  .rotation-control:last-child { margin-bottom:2px; }
+  .slider-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:11px; }
+  .slider-label { display:flex; align-items:center; gap:9px; }
+  .axis-chip { display:inline-flex; align-items:center; justify-content:center; gap:3px; min-width:42px; height:24px; font:11px ui-monospace,SFMono-Regular,Consolas,monospace; color:var(--warm); border:1px solid #f5b47c2a; background:#f5b47c0b; border-radius:5px; }
+  .axis-chip .axis-arrow { opacity:.55; font-size:10px; }
+  .slider-name { color:#c5cbd5; font-size:11px; }
+  .angle-input-wrap { display:flex; align-items:center; color:var(--faint); font:11px ui-monospace,SFMono-Regular,Consolas,monospace; }
+  .angle-number { border:0; background:transparent; color:#e5e8ed; width:49px; text-align:right; padding:3px 0; font:11px ui-monospace,SFMono-Regular,Consolas,monospace; appearance:textfield; -moz-appearance:textfield; }
+  .angle-number::-webkit-inner-spin-button,.angle-number::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+  .angle-number:focus { background:#252932; border-radius:3px; }
+  .range-wrap { position:relative; display:flex; height:20px; align-items:center; }
+  input[type="range"] { -webkit-appearance:none; appearance:none; display:block; width:100%; height:4px; margin:0; border-radius:9px; background:linear-gradient(to right,var(--warm) 0%,var(--warm) var(--fill,50%),#363b44 var(--fill,50%),#363b44 100%); outline-offset:7px; cursor:ew-resize; touch-action:pan-y; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; background:#f5bc8d; border:3px solid #181b20; border-radius:50%; box-shadow:0 0 0 1px var(--warm),0 2px 7px #0005; cursor:ew-resize; }
+  input[type="range"]::-moz-range-thumb { width:9px; height:9px; background:#f5bc8d; border:3px solid #181b20; border-radius:50%; box-shadow:0 0 0 1px var(--warm); }
+  input[type="range"]:hover::-webkit-slider-thumb { box-shadow:0 0 0 1px var(--warm),0 0 0 5px #f5b47c12; }
+  .range-ticks { display:flex; justify-content:space-between; margin-top:3px; color:#737b87; font:8px ui-monospace,SFMono-Regular,Consolas,monospace; pointer-events:none; }
+  .range-ticks span:nth-child(2) { color:#808995; }
+  .presets { display:flex; gap:6px; margin-top:21px; }
+  .preset { flex:1; border:1px solid #353a43; background:transparent; color:#aeb5c1; border-radius:6px; padding:7px 3px; font-size:9px; }
+  .preset:hover { border-color:#8a6d55; color:var(--warm); background:#f5b47c08; }
+  .preset.active { border-color:#b0835d; color:var(--warm); background:#f5b47c0e; }
+  .segmented { display:grid; grid-template-columns:1fr 1fr; padding:3px; border:1px solid #30343c; border-radius:8px; background:#101216; }
+  .segmented button { padding:9px 3px; border:0; border-radius:5px; font-size:10px; background:transparent; color:#89919f; }
+  .segmented button.active { color:#e5e8ee; background:#2b3039; box-shadow:0 1px 3px #0003; }
+  .display-toggles { display:flex; justify-content:space-between; gap:10px; margin:16px 0 0; }
+  .check-label { display:inline-flex; align-items:center; gap:6px; color:#b5bdc9; font-size:10px; cursor:pointer; }
+  input[type="checkbox"] { margin:0; accent-color:var(--warm); width:12px; height:12px; cursor:pointer; }
+  .info-note { display:flex; gap:9px; align-items:flex-start; margin-top:22px; padding:12px; border:1px solid #31353e; border-radius:8px; background:#1a1d23; color:#969fac; font-size:10px; line-height:1.65; }
+  .info-note svg { margin-top:2px; width:13px; height:13px; flex:none; color:var(--warm); }
+  .info-note strong { font-weight:500; color:#c5cbd6; }
+  .footer { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:0 25px; border-top:1px solid var(--line); color:#88919d; font:9px ui-monospace,SFMono-Regular,Consolas,monospace; letter-spacing:.2px; }
+  .footer-left { display:flex; gap:17px; align-items:center; }
+  .status-dot { display:inline-block; width:5px; height:5px; background:#9fbb9b; border-radius:50%; margin-right:7px; vertical-align:1px; }
+  .footer-key { color:#66717f; }
+  .footer-key kbd { color:#aeb8c5; font:inherit; margin-right:4px; }
+  .toast { position:absolute; top:26px; left:50%; transform:translate(-50%,-14px); opacity:0; pointer-events:none; padding:10px 16px; border:1px solid #4a4b46; border-radius:8px; background:#292923f5; color:#efe5d8; font-size:11px; transition:opacity .2s,transform .2s; white-space:nowrap; z-index:5; }
+  .toast.visible { opacity:1; transform:translate(-50%,0); }
+  dialog { width:min(540px,calc(100% - 32px)); max-height:90dvh; border:1px solid #434955; border-radius:17px; background:#1a1e25; color:var(--text); padding:29px; box-shadow:0 25px 120px #000a; }
+  dialog::backdrop { background:#070a0ec9; backdrop-filter:blur(6px); }
+  .dialog-top { display:flex; align-items:center; justify-content:space-between; }
+  dialog h2 { margin:0; font-size:23px; font-weight:550; letter-spacing:-.5px; }
+  dialog h3 { font-size:12px; font-weight:600; color:var(--warm); margin:23px 0 8px; }
+  dialog p { font-size:12px; line-height:1.8; color:#b6c0ce; margin:10px 0; }
+  dialog .formula { padding:13px; background:#11151b; border:1px solid #303943; border-radius:7px; font:12px ui-monospace,SFMono-Regular,Consolas,monospace; color:#d5e2ef; line-height:1.8; }
+  .shortcut-grid { display:grid; grid-template-columns:90px 1fr; gap:9px 12px; font-size:11px; color:#b6c0ce; }
+  .shortcut-grid kbd { font:10px ui-monospace,SFMono-Regular,Consolas,monospace; color:var(--warm); }
+  .close-dialog { background:transparent; border:0; color:var(--muted); padding:7px; border-radius:6px; }
+  .close-dialog:hover { background:#303641; color:white; }
+  .close-dialog svg { width:19px; height:19px; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  @media (min-width:1700px) { .workspace { grid-template-columns:minmax(0,1fr) 380px; } .sidebar { padding:33px 30px; } .rotation-control { margin-bottom:30px; } .separator { margin:29px 0; } }
+  @media (max-height:820px) and (min-width:851px) { .sidebar { padding-top:20px; } .separator { margin:18px 0; } .rotation-control { margin-bottom:16px; } .rotation-intro { margin-bottom:15px; } .info-note { margin-top:16px; } .shape-stats { margin-top:12px; } }
+  @media (max-width:1100px) { .workspace { grid-template-columns:minmax(0,1fr) 315px; } .sidebar { padding-left:21px; padding-right:21px; } .stage-badges { top:auto; bottom:96px; right:25px; } .legend { max-width:140px; } .canvas-hint { flex-direction:column; gap:5px; } .stage-heading { left:25px; } .stage-bottom { left:23px; } .view-toolbar { bottom:30px; } .axis-key { display:none; } }
+  @media (max-width:850px) { .app { height:auto; min-height:100dvh; grid-template-rows:70px auto 36px; } .workspace { display:flex; flex-direction:column; } .stage { height:560px; min-height:440px; } .sidebar { overflow:visible; border-left:0; border-top:1px solid var(--line); padding:25px 28px; display:grid; grid-template-columns:1fr 1fr; gap:0 30px; } .shape-section { grid-column:1; } .rotation-section { grid-column:2; grid-row:1 / span 4; } .display-section { grid-column:1; margin-top:25px; } .sidebar > .separator { display:none; } .info-note { grid-column:1; align-self:start; } .rotation-control { margin-bottom:21px; } .topbar { padding:0 22px; } .stage-badges { top:28px; bottom:auto; } .axis-key { display:block; } .canvas-hint { flex-direction:row; } .legend { max-width:none; } .footer-key { display:none; } }
+  @media (max-width:540px) { .topbar { padding:0 18px; } .brand-name { font-size:16px; } .brand-caption { font-size:7px; letter-spacing:1.6px; } .brand-mark { width:31px; height:31px; } .dimension-flow { display:none; } .top-help { font-size:10px; padding:7px 9px; } .stage { height:490px; } .stage-heading { top:24px; left:21px; } h1 { font-size:29px; } .shape-description { font-size:10px; max-width:250px; } .eyebrow { font-size:8px; } .stage-badges { top:auto; bottom:92px; right:19px; } .projection-badge { font-size:8px; } .stage-bottom { bottom:86px; left:20px; right:20px; } .canvas-hint { display:none; } .axis-key { display:none; } .view-toolbar { bottom:24px; } .sidebar { display:block; padding:25px 25px 28px; } .sidebar > .separator { display:block; margin:23px 0; } .rotation-control { margin-bottom:24px; } .rotation-intro { margin-bottom:21px; } .display-section { margin-top:0; } .info-note { margin-top:22px; } .footer { padding:0 16px; font-size:8px; } .footer-left { gap:9px; } .footer-right { max-width:125px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .toast { top:120px; max-width:90%; white-space:normal; text-align:center; } }
+  /* Keep the geometry in view while the phone user scrolls and drags controls. */
+  @media (max-width:540px) {
+    .stage { height:370px; min-height:370px; position:sticky; top:0; z-index:3; flex-shrink:0; border-bottom:1px solid var(--line); }
+    .stage-heading { top:17px; }
+    .stage-heading h1 { font-size:25px; margin-top:8px; }
+    .shape-description { font-size:9px; }
+    .stage-bottom { bottom:76px; }
+    .stage-badges { bottom:76px; }
+    .view-toolbar { bottom:17px; }
+    input[type="range"] { scroll-margin-top:420px; }
+  }
+  @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; transition:none!important; } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M20 2.5 36 11.5V29L20 38 4 29V11.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m20 11 8 4.5v9L20 29l-8-4.5v-9Z" stroke="currentColor" stroke-width="1.3"/><path d="M4 11.5 12 15.5M36 11.5l-8 4M20 2.5V11M20 29v9M4 29l8-4.5M36 29l-8-4.5M12 15.5l8 4.5 8-4.5M20 20v9" stroke="currentColor" stroke-width="1.1" opacity=".7"/></svg>
+      <div><div class="brand-name">FOURSPACE</div><div class="brand-caption">A window into the fourth dimension</div></div>
+    </div>
+    <div class="top-right"><div class="dimension-flow" aria-label="4 dimensions projected to 3 dimensions, then to the screen"><b>4D</b><span>→</span><span>3D</span><span>→</span><span>2D</span></div><button class="top-help" id="helpButton"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M12 16v1"/></svg>How it works</button></div>
+  </header>
+  <main class="workspace">
+    <section class="stage" id="stage" aria-label="Interactive four-dimensional projection">
+      <canvas id="scene" tabindex="0" aria-label="4D geometry. Drag to orbit the projected shape. Scroll or pinch to zoom. Use the four rotation sliders to change its four-dimensional orientation.">Your browser needs Canvas 2D support to display this visualizer.</canvas>
+      <div class="stage-heading"><div class="eyebrow">EXPLORER / <span id="shapeIndex">01</span></div><h1 id="shapeTitle">Tesseract</h1><div class="shape-description" id="shapeDescription">A cube, extended into a dimension you can’t see.</div></div>
+      <div class="stage-badges"><span class="projection-badge" id="projectionBadge"><span class="live-dot"></span>4D PERSPECTIVE</span></div>
+      <div class="stage-bottom">
+        <div class="legend"><div class="legend-label">Fourth-axis depth</div><div class="legend-scale"><span>−W</span><span class="gradient"></span><span>+W</span></div><div class="canvas-hint"><span>Drag to orbit</span><span>Scroll to zoom</span></div></div>
+        <svg class="axis-key" id="axisKey" viewBox="0 0 81 71" aria-label="Projected four-dimensional axes"><g id="axisLines"></g></svg>
+      </div>
+      <div class="view-toolbar" role="toolbar" aria-label="View tools">
+        <button class="tool-button" id="animateButton" title="Animate / pause (Space)" aria-label="Animate rotation" aria-pressed="false"><svg id="playIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m8 5 11 7-11 7Z"/></svg><span id="animateLabel">Animate</span></button>
+        <span class="tool-divider"></span>
+        <button class="tool-button" id="resetButton" title="Reset view (R)" aria-label="Reset view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 10a8 8 0 1 1 1.5 7M4 4v6h6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="tool-button" id="saveButton" title="Save a PNG snapshot (S)" aria-label="Save PNG snapshot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8 6l1.5-2h5L16 6h4v14H4V6Z" stroke-linejoin="round"/><circle cx="12" cy="12.5" r="3.5"/></svg></button>
+        <button class="tool-button" id="fullscreenButton" title="Toggle fullscreen (F)" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 4H4v5M15 4h5v5M4 15v5h5M20 15v5h-5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </section>
+    <aside class="sidebar" aria-label="Visualization controls">
+      <section class="shape-section">
+        <div class="section-heading"><h2 class="section-title"><label for="shapeSelect">Geometry</label></h2><span class="section-number">01</span></div>
+        <div class="select-wrap"><select id="shapeSelect"><option value="tesseract">Tesseract · 8-cell</option><option value="cell16">16-cell · Orthoplex</option><option value="cell24">24-cell · Icositetrachoron</option><option value="simplex">5-cell · 4-simplex</option><option value="sphere">Hypersphere · S³</option><option value="torus">Clifford torus · S¹ × S¹</option></select><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 4 4 4 4-4"/></svg></div>
+        <div class="shape-stats" aria-live="polite"><div class="stat"><div class="stat-value" id="vertexCount">16</div><div class="stat-label" id="vertexLabel">Vertices</div></div><div class="stat"><div class="stat-value" id="edgeCount">32</div><div class="stat-label" id="edgeLabel">Edges</div></div><div class="stat"><div class="stat-value" id="cellCount">8</div><div class="stat-label" id="cellLabel">Cells</div></div></div>
+      </section>
+      <hr class="separator">
+      <section class="rotation-section">
+        <div class="section-heading"><h2 class="section-title">View direction</h2><span class="section-number">02</span></div>
+        <p class="rotation-intro">Drag the sliders. Discover another perspective.</p>
+        <div id="rotationControls"></div>
+        <div class="presets" aria-label="View presets"><button class="preset" data-preset="classic">Nested cubes</button><button class="preset" data-preset="isometric">Oblique</button><button class="preset" data-preset="insideout">Inside out</button></div>
+      </section>
+      <hr class="separator">
+      <section class="display-section">
+        <div class="section-heading"><h2 class="section-title">Projection</h2><span class="section-number">03</span></div>
+        <div class="segmented" role="group" aria-label="4D to 3D projection"><button id="perspectiveButton" class="active" data-projection="perspective" aria-pressed="true">Perspective</button><button id="orthographicButton" data-projection="orthographic" aria-pressed="false">Orthographic</button></div>
+        <div class="display-toggles"><label class="check-label"><input type="checkbox" id="facesToggle" checked>Faces</label><label class="check-label"><input type="checkbox" id="verticesToggle" checked>Vertices</label><label class="check-label"><input type="checkbox" id="gridToggle" checked>Grid</label></div>
+      </section>
+      <div class="info-note"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v5M10 5.5v1"/></svg><span id="shapeNote"><strong>Not a cube inside a cube.</strong> Both are equal-sized 3D cells; perspective in 4D makes one look smaller.</span></div>
+    </aside>
+  </main>
+  <footer class="footer"><div class="footer-left"><span><span class="status-dot"></span>LOCAL / OFFLINE READY</span><span class="footer-key"><kbd>SPACE</kbd> animate <span style="margin-left:9px"><kbd>R</kbd> reset</span></span></div><div class="footer-right" id="footerInfo">4 coordinates. One new perspective.</div></footer>
+</div>
+<dialog id="helpDialog" aria-labelledby="helpTitle">
+  <div class="dialog-top"><h2 id="helpTitle">A little perspective.</h2><button class="close-dialog" id="closeHelp" aria-label="Close help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m6 6 12 12M6 18 18 6"/></svg></button></div>
+  <p>Every point here has four coordinates: <strong>(x, y, z, w)</strong>. You’re seeing a 3D projection of a 4D object, viewed through a 3D camera on your 2D screen. It’s a projection, not a cross-section.</p>
+  <h3>The four sliders</h3>
+  <p>The first three rotate the object in the <strong>XW, YW, and ZW planes</strong>, mixing a familiar axis with the fourth axis. The last rotates in <strong>XY</strong>. A 4D rotation happens in a plane, not around a single axis. These are four useful controls; 4D has six independent rotation planes.</p>
+  <p>Dragging the canvas orbits the resulting 3D projection. This is different from moving the sliders, which changes the 4D orientation itself. Touching a slider pauses animation so it stays under your control.</p>
+  <h3>How the projection works</h3>
+  <div class="formula">Perspective: (x, y, z) × d / (d − w)<br>Orthographic: (x, y, z)</div>
+  <p>Here d = 4.2. All objects are scaled to a 4D radius of 1.7, so the projection stays away from its singularity. Warm colors indicate positive rotated W; cool colors indicate negative W. The 3D camera uses perspective in both modes.</p>
+  <h3>Controls</h3>
+  <div class="shortcut-grid"><kbd>Drag</kbd><span>Orbit the 3D camera</span><kbd>Scroll / pinch</kbd><span>Zoom in or out</span><kbd>Sliders / ← →</kbd><span>Rotate in 4D; type a precise angle next to any slider</span><kbd>Double-click</kbd><span>Reset a slider to 0°, or reset the view on the canvas</span><kbd>Space · R</kbd><span>Play / pause animation · Reset view</span><kbd>S · F · ?</kbd><span>Save image · Fullscreen · This guide</span></div>
+  <p style="margin-top:20px;font-size:10px;color:#828e9c">Faces are translucent guides, not a hidden-surface or solid-cell rendering. The hypersphere is a sampled 3D manifold in 4D; the Clifford torus is a sampled 2D surface in 4D. Nothing is uploaded, and no external libraries are required.</p>
+</dialog>
+<script>
+'use strict';
+(() => {
+  // Self-contained geometry, rotation, projection, and Canvas 2D rendering.
+  // A 4D orientation is a composition of four plane rotations, not four Euler axes.
+  const $ = id => document.getElementById(id);
+  const TAU = Math.PI * 2;
+  const DEG = Math.PI / 180;
+  const RADIUS = 1.7;
+  const PROJECTION_DISTANCE = 4.2;
+  const CAMERA_DISTANCE = 6.5;
+  const planes = [[0,3], [1,3], [2,3], [0,1]];
+  const defaults = [14, -22, 8, 0];
+  const planeMeta = [
+    { key:'xw', a:'X', b:'W', name:'X into W' },
+    { key:'yw', a:'Y', b:'W', name:'Y into W' },
+    { key:'zw', a:'Z', b:'W', name:'Z into W' },
+    { key:'xy', a:'X', b:'Y', name:'XY spin' }
+  ];
+  const state = {
+    angles: defaults.slice(), shape:'tesseract', projection:'perspective',
+    yaw:-0.52, pitch:0.32, zoom:1, animate:false,
+    faces:true, vertices:true, grid:true
+  };
+  const canvas = $('scene');
+  const ctx = canvas.getContext('2d', { alpha:true });
+  if (!ctx) {
+    $('shapeDescription').textContent = 'Canvas 2D is unavailable. Open this file in a browser with canvas support.';
+    return;
+  }
+  let width = 1, height = 1, dpr = 1, dirty = true;
+  let mesh, lastTime = 0, lastUiTime = 0, rafId = 0, toastTimer;
+  let frameCount = 0;
+  const sliders = [], numberInputs = [];
+  const geometryCache = new Map();
+  const clamp = (x,a,b) => Math.max(a,Math.min(b,x));
+  const wrap = degrees => ((degrees + 180) % 360 + 360) % 360 - 180;
+  const distSq = (a,b) => a.reduce((sum,x,i) => sum+(x-b[i])**2,0);
+  const mean = (values) => values.reduce((a,b)=>a+b,0)/values.length;
+
+  function normalizeMesh(m) {
+    const maxNorm = Math.max(...m.vertices.map(v => Math.hypot(...v)));
+    m.vertices = m.vertices.map(v => v.map(x => x * RADIUS/maxNorm));
+    return m;
+  }
+  function edgesAtDistance(vertices, target) {
+    const edges=[];
+    for (let i=0;i<vertices.length;i++) for (let j=i+1;j<vertices.length;j++) {
+      if (Math.abs(distSq(vertices[i],vertices[j])-target)<1e-7) edges.push([i,j]);
+    }
+    return edges;
+  }
+  function triangleFaces(vertices, edges) {
+    const adjacent = Array.from({length:vertices.length},()=>new Set());
+    for (const [a,b] of edges) { adjacent[a].add(b); adjacent[b].add(a); }
+    const faces=[];
+    for (let a=0;a<vertices.length;a++) for (const b of adjacent[a]) {
+      if (b<=a) continue;
+      for (const c of adjacent[b]) if (c>b && adjacent[a].has(c)) faces.push([a,b,c]);
+    }
+    return faces;
+  }
+  function makeTesseract() {
+    const vertices=Array.from({length:16},(_,i)=>[0,1,2,3].map(d=>((i>>d)&1)?1:-1));
+    const edges=[],faces=[];
+    for (let i=0;i<16;i++) for (let d=0;d<4;d++) if (!(i&(1<<d))) edges.push([i,i^(1<<d)]);
+    for (let a=0;a<4;a++) for (let b=a+1;b<4;b++) {
+      const rest=[0,1,2,3].filter(d=>d!==a&&d!==b);
+      for (let fixed=0;fixed<4;fixed++) {
+        const base=((fixed&1)?1<<rest[0]:0)+((fixed&2)?1<<rest[1]:0);
+        faces.push([base,base^(1<<a),base^(1<<a)^(1<<b),base^(1<<b)]);
+      }
+    }
+    return normalizeMesh({vertices,edges,faces,cells:8,index:'01',title:'Tesseract',
+      description:'A cube, extended into a dimension you can’t see.',
+      note:'<strong>Not a cube inside a cube.</strong> The inner and outer cubes of the nested view are equal-sized 3D cells, separated along W. Perspective makes one look smaller.'});
+  }
+  function make16Cell() {
+    const vertices=[];
+    for(let a=0;a<4;a++) for(const s of [-1,1]) { const v=[0,0,0,0];v[a]=s;vertices.push(v); }
+    const edges=edgesAtDistance(vertices,2);
+    return normalizeMesh({vertices,edges,faces:triangleFaces(vertices,edges),cells:16,index:'02',title:'16-cell',
+      description:'Eight vertices. Sixteen tetrahedra. Four dimensions.',
+      note:'<strong>The tesseract’s dual.</strong> Its eight vertices lie on the positive and negative ends of the four coordinate axes.'});
+  }
+  function make24Cell() {
+    const vertices=[];
+    for(let a=0;a<4;a++) for(let b=a+1;b<4;b++) for(const sa of [-1,1]) for(const sb of [-1,1]) {
+      const v=[0,0,0,0];v[a]=sa;v[b]=sb;vertices.push(v);
+    }
+    const edges=edgesAtDistance(vertices,2);
+    return normalizeMesh({vertices,edges,faces:triangleFaces(vertices,edges),cells:24,index:'03',title:'24-cell',
+      description:'Twenty-four octahedral cells, perfectly connected.',
+      note:'<strong>A four-dimensional original.</strong> This regular, self-dual polytope has no direct regular-polytope counterpart in 3D.'});
+  }
+  function makeSimplex() {
+    // An orthonormal basis for the sum-zero subspace of R^5 gives a regular 4-simplex.
+    const vertices=Array.from({length:5},()=>[]);
+    for(let k=1;k<=4;k++) {
+      const denom=Math.sqrt(k*(k+1));
+      for(let i=0;i<5;i++) vertices[i].push(i<k?1/denom:(i===k?-k/denom:0));
+    }
+    const edges=[];
+    for(let a=0;a<5;a++) for(let b=a+1;b<5;b++) edges.push([a,b]);
+    return normalizeMesh({vertices,edges,faces:triangleFaces(vertices,edges),cells:5,index:'04',title:'5-cell',
+      description:'The simplest possible polytope in four dimensions.',
+      note:'<strong>The next step after a tetrahedron.</strong> Five equidistant vertices form five tetrahedral cells. Every vertex connects to every other.'});
+  }
+  function makeSphere() {
+    // Hopf coordinates: (cos η cos ξ1, cos η sin ξ1, sin η cos ξ2, sin η sin ξ2).
+    // Deduplicate the endpoint circles: one angular coordinate collapses at each end.
+    const vertices=[],edges=[],faces=[],vertexMap=new Map(),edgeSet=new Set();
+    const layers=6,n=16, ids=[];
+    function addVertex(v) {
+      const key=v.map(x=>Math.round(x*1e8)).join(',');
+      if(vertexMap.has(key)) return vertexMap.get(key);
+      const id=vertices.length;vertices.push(v);vertexMap.set(key,id);return id;
+    }
+    function addEdge(a,b) {
+      if(a===b)return;const key=a<b?`${a},${b}`:`${b},${a}`;
+      if(!edgeSet.has(key)){edges.push([a,b]);edgeSet.add(key);}
+    }
+    function addFace(list) { const f=[...new Set(list)];if(f.length>=3)faces.push(f); }
+    for(let k=0;k<=layers;k++) {
+      const eta=(k/layers)*Math.PI/2;ids[k]=[];
+      for(let i=0;i<n;i++) { ids[k][i]=[];for(let j=0;j<n;j++) {
+        const a=i/n*TAU,b=j/n*TAU;
+        ids[k][i][j]=addVertex([Math.cos(eta)*Math.cos(a),Math.cos(eta)*Math.sin(a),Math.sin(eta)*Math.cos(b),Math.sin(eta)*Math.sin(b)]);
+      }}
+    }
+    for(let k=0;k<=layers;k++) for(let i=0;i<n;i++) for(let j=0;j<n;j++) {
+      const a=ids[k][i][j],b=ids[k][(i+1)%n][j],c=ids[k][i][(j+1)%n];
+      addEdge(a,b);addEdge(a,c);
+      if(k<layers) addEdge(a,ids[k+1][i][j]);
+      // A few transparent toroidal sheets suggest the S^3 volume without obscuring it.
+      if(k===2||k===4) addFace([a,b,ids[k][(i+1)%n][(j+1)%n],c]);
+    }
+    return normalizeMesh({vertices,edges,faces,cells:'S³',sampled:true,dense:true,index:'05',title:'Hypersphere',
+      description:'A sphere’s higher-dimensional counterpart, sampled in 4D.',
+      note:'<strong>A 3D surface in 4D.</strong> Every sampled point satisfies x² + y² + z² + w² = r². The wire lattice reveals orientation; the complete S³ is rotationally symmetric.'});
+  }
+  function makeTorus() {
+    const n=36,m=24,vertices=[],edges=[],faces=[];
+    for(let i=0;i<n;i++) for(let j=0;j<m;j++) {
+      const a=i/n*TAU,b=j/m*TAU;
+      vertices.push([Math.cos(a),Math.sin(a),Math.cos(b),Math.sin(b)]);
+    }
+    const id=(i,j)=>((i+n)%n)*m+((j+m)%m);
+    for(let i=0;i<n;i++) for(let j=0;j<m;j++) {
+      const a=id(i,j),b=id(i+1,j),c=id(i+1,j+1),d=id(i,j+1);
+      edges.push([a,b],[a,d]);faces.push([a,b,c,d]);
+    }
+    return normalizeMesh({vertices,edges,faces,cells:'T²',sampled:true,dense:true,index:'06',title:'Clifford torus',
+      description:'Two circles, living together in four dimensions.',
+      note:'<strong>Not an ordinary doughnut.</strong> One circle occupies XY; a second occupies ZW. Their Cartesian product is a flat 2D torus embedded in 4D.'});
+  }
+  const makers={tesseract:makeTesseract,cell16:make16Cell,cell24:make24Cell,simplex:makeSimplex,sphere:makeSphere,torus:makeTorus};
+  function getGeometry(key) {
+    if(!geometryCache.has(key))geometryCache.set(key,makers[key]());
+    return geometryCache.get(key);
+  }
+  function setShape(key) {
+    if(!makers[key])return;
+    state.shape=key;mesh=getGeometry(key);
+    $('shapeSelect').value=key;$('shapeIndex').textContent=mesh.index;
+    $('shapeTitle').textContent=mesh.title;$('shapeDescription').textContent=mesh.description;
+    $('shapeNote').innerHTML=mesh.note;
+    $('vertexCount').textContent=mesh.vertices.length.toLocaleString();
+    $('edgeCount').textContent=mesh.edges.length.toLocaleString();$('cellCount').textContent=mesh.cells;
+    $('vertexLabel').textContent=mesh.sampled?'Samples':'Vertices';
+    $('edgeLabel').textContent=mesh.sampled?'Segments':'Edges';
+    $('cellLabel').textContent=mesh.sampled?'Manifold':'Cells';
+    document.querySelector('[data-preset="classic"]').textContent=key==='tesseract'?'Nested cubes':'Aligned';
+    dirty=true;
+  }
+
+  // Plane rotations preserve the 4D norm. Composition order is XW → YW → ZW → XY.
+  function rotate4(v, trig) {
+    const r=v.slice();
+    for(let k=0;k<4;k++) {
+      const [a,b]=planes[k],c=trig[k][0],s=trig[k][1],u=r[a],t=r[b];
+      r[a]=u*c-t*s;r[b]=u*s+t*c;
+    }
+    return r;
+  }
+  function project4(v) {
+    const factor=state.projection==='perspective'?PROJECTION_DISTANCE/(PROJECTION_DISTANCE-v[3]):1;
+    return [v[0]*factor,v[1]*factor,v[2]*factor];
+  }
+  function cameraFrame(w=width,h=height) {
+    return { cy:Math.cos(state.yaw),sy:Math.sin(state.yaw),cp:Math.cos(state.pitch),sp:Math.sin(state.pitch),
+      focal:Math.min(w,h)*(w<540&&h<440?1.0:1.30)*state.zoom,centerX:w*.50,centerY:h*.51+(w<540&&h<440?12:(w<540?0:9)) };
+  }
+  function project3(v,cam) {
+    const x=v[0]*cam.cy+v[2]*cam.sy;
+    const z=-v[0]*cam.sy+v[2]*cam.cy;
+    const y=v[1]*cam.cp-z*cam.sp;
+    const z2=v[1]*cam.sp+z*cam.cp;
+    const depth=CAMERA_DISTANCE-z2;
+    const safeDepth=Math.max(.2,depth);
+    return { x:cam.centerX+x*cam.focal/safeDepth,y:cam.centerY-y*cam.focal/safeDepth,depth,scale:cam.focal/safeDepth };
+  }
+  function depthColor(w,alpha=1) {
+    const t=clamp((w/RADIUS+1)/2,0,1);
+    return `rgba(${Math.round(120+125*t)},${Math.round(179+1*t)},${Math.round(213-89*t)},${alpha})`;
+  }
+  function drawGrid(c,cam,w,h) {
+    c.save();c.lineWidth=.7;
+    const y=-2.08;
+    for(let k=-7;k<=7;k++) {
+      const alpha=(1-Math.abs(k)/10)*.125;
+      c.strokeStyle=`rgba(142,163,187,${alpha})`;
+      for(const ends of [[[k,y,-7],[k,y,7]],[[-7,y,k],[7,y,k]]]) {
+        const a=project3(ends[0],cam),b=project3(ends[1],cam);
+        if(a.depth<.45||b.depth<.45)continue;
+        c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();
+      }
+    }
+    const center=project3([0,y,0],cam);
+    const origin=project3([0,0,0],cam);
+    c.setLineDash([2,6]);c.strokeStyle='rgba(142,163,187,.18)';
+    c.beginPath();c.moveTo(center.x,center.y);c.lineTo(origin.x,origin.y);c.stroke();c.setLineDash([]);
+    c.strokeStyle='rgba(170,189,210,.23)';c.beginPath();c.ellipse(center.x,center.y,6,2.5,0,0,TAU);c.stroke();
+    c.restore();
+  }
+  function drawBackdrop(c,w,h) {
+    const g=c.createRadialGradient(w*.5,h*.47,0,w*.5,h*.47,Math.max(w,h)*.7);
+    g.addColorStop(0,'#20262e');g.addColorStop(.4,'#171b22');g.addColorStop(1,'#111419');
+    c.fillStyle=g;c.fillRect(0,0,w,h);
+    c.fillStyle='rgba(154,168,186,.13)';
+    for(let x=0;x<w;x+=24)for(let y=0;y<h;y+=24){c.beginPath();c.arc(x,y,.55,0,TAU);c.fill();}
+  }
+  function render(c=ctx,w=width,h=height,snapshot=false) {
+    if(snapshot)drawBackdrop(c,w,h);else c.clearRect(0,0,w,h);
+    const trig=state.angles.map(a=>[Math.cos(a*DEG),Math.sin(a*DEG)]);
+    const cam=cameraFrame(w,h);
+    if(state.grid)drawGrid(c,cam,w,h);
+    const rotated=mesh.vertices.map(v=>rotate4(v,trig));
+    const pts=rotated.map(v=>({...project3(project4(v),cam),w:v[3]}));
+    if(state.faces) {
+      const faces=mesh.faces.map(face=>({indices:face,depth:mean(face.map(i=>pts[i].depth)),w:mean(face.map(i=>pts[i].w))})).sort((a,b)=>b.depth-a.depth);
+      const alpha=mesh.dense?.012:.035;
+      for(const face of faces) {
+        c.fillStyle=depthColor(face.w,alpha);c.beginPath();
+        face.indices.forEach((index,i)=>{const p=pts[index];i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y);});c.closePath();c.fill();
+      }
+    }
+    const edges=mesh.edges.map(([a,b])=>({a:pts[a],b:pts[b],depth:(pts[a].depth+pts[b].depth)/2,w:(pts[a].w+pts[b].w)/2})).sort((a,b)=>b.depth-a.depth);
+    c.lineCap='round';
+    // A broad, low-alpha pass makes the sparse polytopes luminous without expensive shadows.
+    if(!mesh.dense) {
+      c.lineWidth=7;
+      for(const edge of edges){c.strokeStyle=depthColor(edge.w,.035);c.beginPath();c.moveTo(edge.a.x,edge.a.y);c.lineTo(edge.b.x,edge.b.y);c.stroke();}
+    }
+    for(const edge of edges) {
+      const depthFactor=clamp((8.5-edge.depth)/4,.24,1);
+      c.lineWidth=mesh.dense?.64:1.2+depthFactor*.5;
+      c.strokeStyle=depthColor(edge.w,mesh.dense?(.13+depthFactor*.30):(.42+depthFactor*.48));
+      c.beginPath();c.moveTo(edge.a.x,edge.a.y);c.lineTo(edge.b.x,edge.b.y);c.stroke();
+    }
+    if(state.vertices) {
+      const ordered=pts.slice().sort((a,b)=>b.depth-a.depth);
+      for(const p of ordered){
+        const near=clamp((8.5-p.depth)/4,.25,1);
+        const r=mesh.dense?.8:1.6+near*1.1;
+        if(!mesh.dense){c.fillStyle=depthColor(p.w,.10);c.beginPath();c.arc(p.x,p.y,r+4,0,TAU);c.fill();}
+        c.fillStyle=depthColor(p.w,mesh.dense?.35:.9);c.beginPath();c.arc(p.x,p.y,r,0,TAU);c.fill();
+        if(!mesh.dense){c.fillStyle=`rgba(255,244,231,${near*.8})`;c.beginPath();c.arc(p.x,p.y,.85,0,TAU);c.fill();}
+      }
+    }
+    if(!snapshot)updateAxisKey(trig,cam);
+    frameCount++;
+  }
+  function updateAxisKey(trig,cam) {
+    const origin={x:39,y:36};const labels=['X','Y','Z','W'];
+    const pieces=[];
+    const tips=[];
+    for(let i=0;i<4;i++){
+      const v=[0,0,0,0];v[i]=1;
+      const r=rotate4(v,trig),v3=r.slice(0,3);
+      const x=v3[0]*cam.cy+v3[2]*cam.sy,z=-v3[0]*cam.sy+v3[2]*cam.cy,y=v3[1]*cam.cp-z*cam.sp;
+      const tx=origin.x+x*23,ty=origin.y-y*23;
+      const color=i===3?'#f5b47c':'#869aad';
+      pieces.push(`<line x1="${origin.x}" y1="${origin.y}" x2="${tx.toFixed(2)}" y2="${ty.toFixed(2)}" stroke="${color}" stroke-width="1.1" ${i===3?'stroke-dasharray="2 2"':''}/>`);
+      tips.push(`<text x="${(tx+x*7).toFixed(2)}" y="${(ty-y*7+3).toFixed(2)}" text-anchor="middle" font-size="8" font-family="monospace" fill="${color}">${labels[i]}</text>`);
+    }
+    $('axisLines').innerHTML=pieces.join('')+tips.join('')+'<circle cx="39" cy="36" r="2" fill="#b5c2cf"/>';
+  }
+  function resize() {
+    const r=canvas.getBoundingClientRect();width=Math.max(1,r.width);height=Math.max(1,r.height);
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);dirty=true;
+  }
+  function tick(time) {
+    const dt=lastTime?Math.min((time-lastTime)/1000,.05):0;lastTime=time;
+    if(state.animate && !document.hidden) {
+      const speeds=[8,5,3,1.5];
+      state.angles=state.angles.map((a,i)=>wrap(a+dt*speeds[i]));dirty=true;
+      if(time-lastUiTime>65){syncSliders();lastUiTime=time;}
+    }
+    if(dirty){render();dirty=false;}
+    rafId=requestAnimationFrame(tick);
+  }
+  function syncSliders() {
+    state.angles.forEach((a,i)=>{
+      sliders[i].value=a.toFixed(1);sliders[i].style.setProperty('--fill',`${(a+180)/360*100}%`);
+      sliders[i].setAttribute('aria-valuetext',`${a.toFixed(1)} degrees in the ${planeMeta[i].a}${planeMeta[i].b} plane`);
+      if(document.activeElement!==numberInputs[i])numberInputs[i].value=a.toFixed(1);
+    });
+  }
+  function clearPreset() {document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));}
+  function setAngle(i,value) {
+    if(i<0||i>3||!Number.isFinite(value))return;
+    setAnimation(false);state.angles[i]=clamp(value,-180,180);clearPreset();syncSliders();dirty=true;
+  }
+  function setAnimation(value) {
+    state.animate=Boolean(value);const button=$('animateButton');
+    button.classList.toggle('active',state.animate);button.setAttribute('aria-pressed',String(state.animate));
+    button.setAttribute('aria-label',state.animate?'Pause rotation':'Animate rotation');
+    $('animateLabel').textContent=state.animate?'Pause':'Animate';
+    $('playIcon').innerHTML=state.animate?'<path d="M8 5v14M16 5v14" stroke-width="2.5"/>':'<path d="m8 5 11 7-11 7Z"/>';
+    if(state.animate)clearPreset();else syncSliders();
+  }
+  function resetView(announce=true) {
+    setAnimation(false);state.angles=defaults.slice();state.yaw=-.52;state.pitch=.32;state.zoom=1;
+    clearPreset();syncSliders();dirty=true;if(announce)toast('View reset');
+  }
+  function setPreset(name) {
+    const presets={classic:[0,0,0,0],isometric:[35,45,30,15],insideout:[135,-30,20,0]};
+    if(!presets[name])return;
+    setAnimation(false);state.angles=presets[name].slice();state.yaw=-.52;state.pitch=.32;state.zoom=1;
+    clearPreset();document.querySelector(`[data-preset="${name}"]`).classList.add('active');syncSliders();dirty=true;
+  }
+  function setProjection(value) {
+    if(!['perspective','orthographic'].includes(value))return;
+    state.projection=value;
+    document.querySelectorAll('[data-projection]').forEach(b=>{const active=b.dataset.projection===value;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+    $('projectionBadge').innerHTML=`<span class="live-dot"></span>4D ${value.toUpperCase()}`;dirty=true;
+  }
+  function toast(message) {clearTimeout(toastTimer);$('toast').textContent=message;$('toast').classList.add('visible');toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),2300);}
+  function saveImage() {
+    // Export re-renders the same scene with a background and labels; no screen capture or network access.
+    const out=document.createElement('canvas');const scale=2;
+    out.width=Math.round(width*scale);out.height=Math.round(height*scale);
+    const c=out.getContext('2d');c.scale(scale,scale);render(c,width,height,true);
+    c.fillStyle='#f5b47c';c.font='500 10px ui-monospace,monospace';c.fillText('FOURSPACE / 4D EXPLORER',27,31);
+    c.fillStyle='#edf0f3';c.font='500 28px system-ui,sans-serif';c.fillText(mesh.title,26,70);
+    c.fillStyle='#99a6b7';c.font='10px ui-monospace,monospace';
+    const settings=planeMeta.map((p,i)=>`${p.a}${p.b} ${state.angles[i].toFixed(1)}°`).join('   ');
+    c.fillText(settings,26,height-42);c.fillText(`4D ${state.projection}  →  3D perspective`,26,height-24);
+    out.toBlob(blob=>{
+      if(!blob){toast('Image export was unavailable in this browser');return;}
+      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`fourspace-${state.shape}.png`;
+      document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);toast('Snapshot saved');
+    },'image/png');
+  }
+  async function toggleFullscreen() {
+    try {
+      if(document.fullscreenElement)await document.exitFullscreen();
+      else if($('app').requestFullscreen)await $('app').requestFullscreen();
+      else toast('Fullscreen isn’t available in this browser');
+    } catch {toast('Fullscreen isn’t available in this window');}
+  }
+
+  // Build exactly four native, keyboard-accessible range sliders.
+  planeMeta.forEach((p,i)=>{
+    const block=document.createElement('div');block.className='rotation-control';
+    block.innerHTML=`<div class="slider-heading"><label class="slider-label" for="angle-${p.key}"><span class="axis-chip">${p.a}<span class="axis-arrow">↔</span>${p.b}</span><span class="slider-name">${p.name}</span></label><div class="angle-input-wrap"><input class="angle-number" id="number-${p.key}" type="number" min="-180" max="180" step="0.1" aria-label="${p.a}${p.b} rotation in degrees"><span aria-hidden="true">°</span></div></div><div class="range-wrap"><input type="range" id="angle-${p.key}" min="-180" max="180" step="0.1" value="${defaults[i]}" aria-label="${p.a}${p.b} rotation"></div><div class="range-ticks" aria-hidden="true"><span>−180°</span><span>0°</span><span>180°</span></div>`;
+    $('rotationControls').appendChild(block);
+    const slider=$(`angle-${p.key}`),number=$(`number-${p.key}`);sliders.push(slider);numberInputs.push(number);
+    slider.addEventListener('input',()=>setAngle(i,Number(slider.value)));
+    slider.addEventListener('pointerdown',()=>setAnimation(false));
+    slider.addEventListener('dblclick',()=>setAngle(i,0));
+    number.addEventListener('focus',()=>setAnimation(false));
+    number.addEventListener('input',()=>{if(number.value!==''&&Number.isFinite(number.valueAsNumber))setAngle(i,number.valueAsNumber);});
+    number.addEventListener('change',()=>{setAngle(i,Number.isFinite(number.valueAsNumber)?number.valueAsNumber:state.angles[i]);number.value=state.angles[i].toFixed(1);});
+    number.addEventListener('keydown',e=>{if(e.key==='Enter')number.blur();});
+    number.addEventListener('blur',()=>{number.value=state.angles[i].toFixed(1);});
+  });
+  $('shapeSelect').addEventListener('change',e=>setShape(e.target.value));
+  $('animateButton').addEventListener('click',()=>setAnimation(!state.animate));
+  $('resetButton').addEventListener('click',()=>resetView());
+  $('saveButton').addEventListener('click',saveImage);
+  $('fullscreenButton').addEventListener('click',toggleFullscreen);
+  document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>setPreset(b.dataset.preset)));
+  document.querySelectorAll('[data-projection]').forEach(b=>b.addEventListener('click',()=>setProjection(b.dataset.projection)));
+  for(const feature of ['faces','vertices','grid'])$(feature+'Toggle').addEventListener('change',e=>{state[feature]=e.target.checked;dirty=true;});
+  const dialog=$('helpDialog');
+  $('helpButton').addEventListener('click',()=>dialog.showModal());
+  $('closeHelp').addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
+
+  // Pointer capture keeps orbiting reliable even when the pointer leaves the canvas.
+  const pointers=new Map();let gestureStart=null;
+  function gestureData() {const p=[...pointers.values()];return p.length>=2?{distance:Math.hypot(p[1].x-p[0].x,p[1].y-p[0].y)}:null;}
+  canvas.addEventListener('pointerdown',e=>{
+    if(e.button!==0&&e.pointerType==='mouse')return;
+    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});canvas.setPointerCapture(e.pointerId);canvas.classList.add('dragging');
+    canvas.focus({preventScroll:true});gestureStart=gestureData();
+  });
+  canvas.addEventListener('pointermove',e=>{
+    if(!pointers.has(e.pointerId))return;
+    const previous=pointers.get(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pointers.size===1){state.yaw+=(e.clientX-previous.x)*.006;state.pitch=clamp(state.pitch+(e.clientY-previous.y)*.006,-1.4,1.4);}
+    else {const now=gestureData();if(gestureStart&&gestureStart.distance>1)state.zoom=clamp(state.zoom*now.distance/gestureStart.distance,.48,2.5);gestureStart=now;}
+    dirty=true;
+  });
+  function releasePointer(e){pointers.delete(e.pointerId);gestureStart=gestureData();if(!pointers.size)canvas.classList.remove('dragging');}
+  canvas.addEventListener('pointerup',releasePointer);canvas.addEventListener('pointercancel',releasePointer);canvas.addEventListener('lostpointercapture',releasePointer);
+  canvas.addEventListener('wheel',e=>{e.preventDefault();const unit=e.deltaMode===1?16:e.deltaMode===2?height:1;state.zoom=clamp(state.zoom*Math.exp(-e.deltaY*unit*.001),.48,2.5);dirty=true;},{passive:false});
+  canvas.addEventListener('dblclick',()=>resetView());
+  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  window.addEventListener('keydown',e=>{
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    if(dialog.open)return;
+    if(e.target instanceof HTMLElement&&(e.target.matches('input,select,textarea')||e.target.isContentEditable))return;
+    if(e.code==='Space'&&e.target instanceof HTMLElement&&e.target.closest('button'))return;
+    if(e.code==='Space'){e.preventDefault();setAnimation(!state.animate);}
+    else if(e.key.toLowerCase()==='r')resetView();
+    else if(e.key.toLowerCase()==='s')saveImage();
+    else if(e.key.toLowerCase()==='f')toggleFullscreen();
+    else if(e.key==='?')dialog.showModal();
+  });
+  new ResizeObserver(resize).observe($('stage'));
+  window.addEventListener('resize',resize);
+  document.addEventListener('visibilitychange',()=>{lastTime=0;dirty=true;});
+  setShape('tesseract');syncSliders();resize();
+  // Start still so each slider has immediate, predictable control. Animation is opt-in.
+  rafId=requestAnimationFrame(tick);
+
+  // Small read-only inspection surface for diagnostics, and programmatic controls for reuse.
+  window.fourspace=Object.freeze({
+    getState:()=>JSON.parse(JSON.stringify(state)),
+    getGeometry:()=>({vertices:mesh.vertices.map(v=>v.slice()),edges:mesh.edges.map(e=>e.slice()),faces:mesh.faces.map(f=>f.slice()),cells:mesh.cells}),
+    getFrameCount:()=>frameCount,
+    setAngle, setShape, setProjection, setPreset, setAnimation, resetView,
+    projectPoint:(v)=>{if(!Array.isArray(v)||v.length!==4||!v.every(Number.isFinite))throw new TypeError('Expected four finite coordinates');return project4(rotate4(v,state.angles.map(a=>[Math.cos(a*DEG),Math.sin(a*DEG)])));}
+  });
+})();
+</script>
+</body>
+</html>
