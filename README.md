@@ -1,11 +1,12 @@
 # Webpage Collection
 
-A collection of browser games and an interactive 4D geometry visualizer. Each page is an HTML file.
+A collection of web pages including browser games and visualizer. Each page is an HTML file.
 
 ## Collections
 
 - [4D Visualizer](4D-visualizer/README.md) — explore and rotate four-dimensional shapes.
 - [Browser Games](browser-games/README.md) — play five games, from city building to arcade action.
+- [Dioramas](diorama/README.md) — explore SoraMart, a rainy-night convenience store miniature.
 
 ## Run locally
 
@@ -19,7 +20,7 @@ python3 -m http.server 8000
 
 Then visit <http://localhost:8000/> and choose a page.
 
-Some games load Three.js from the internet. Cadillacs & Dinosaurs requires a connection and WebGL; the other games have built-in offline renderers. Games that save progress use browser storage, so clearing browser data can remove saves.
+Some pages load Three.js from the internet. Cadillacs & Dinosaurs and SoraMart require a connection and WebGL; the other games have built-in offline renderers. Games that save progress use browser storage, so clearing browser data can remove saves.
 
 ## License
 
